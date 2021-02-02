@@ -1,2 +1,3 @@
-﻿  TestFile.cpp
+﻿  Main.cpp
+C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Main.cpp(10,7): warning C4101: 'ch': unreferenced local variable
   Compiler.vcxproj -> C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Debug\Compiler.exe
