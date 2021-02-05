@@ -16,6 +16,11 @@ static Token ScanToken(ifstream& file, int& lineNum)
 	Token* token = new Token();
 	currCh = file.get(); //get each character individually
 
+	if (currCh == '\n')
+	{
+		lineNum += 1;
+	}
+
 	while (isspace(currCh))
 		currCh = file.get();
 
@@ -113,10 +118,6 @@ static Token ScanToken(ifstream& file, int& lineNum)
 		while (isdigit(currCh = file.get()))
 			token->val.intVal = token->val.intVal * 10 + currCh - '0';
 		file.unget();
-		break;
-
-	case '\n':
-		lineNum += 1;
 		break;
 
 	case EOF:
