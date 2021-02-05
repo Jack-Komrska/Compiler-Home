@@ -1,3 +1,2 @@
 ﻿  Main.cpp
-C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Main.cpp(11,7): warning C4101: 'nextCh': unreferenced local variable
   Compiler.vcxproj -> C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Debug\Compiler.exe
