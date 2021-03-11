@@ -79,13 +79,6 @@ public:
 
 		currCh = file.get(); //get each character individually
 
-		if (file.eof())
-		{
-			token->type = eof;
-			token->val.stringVal[0] = currCh;
-			return *token;
-		}
-
 		if (currCh == '\n')
 		{
 			lineNum += 1;
@@ -221,6 +214,20 @@ public:
 				}
 			}
 			break;
+
+		case '"':
+		{
+			token->type = literal_string;
+			int j = 0;
+			currCh = file.get();
+			while (currCh != '"')
+			{
+				token->val.stringVal[j] = currCh;
+				j++;
+				currCh = file.get();
+			}
+		}
+		break;
 
 		case 'A': case 'B': case 'C': case 'D': case 'E': case 'F': case 'G': case 'H': case 'I': case 'J': case 'K': case 'L': case 'M': case 'N': case 'O': case 'P': case 'Q': case 'R': case 'S': case 'T': case 'U': case 'V': case 'W': case 'X': case 'Y': case 'Z':
 		{
