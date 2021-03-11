@@ -233,9 +233,9 @@ public:
 		{
 			token->val.stringVal[0] = currCh;
 			std::string word = std::to_string(currCh);
-			for (int i = 1; isupper(currCh = file.get()); i++)
+			for (int i = 1; isalpha(currCh = file.get()); i++)
 			{
-				token->val.stringVal[i] = currCh;
+				token->val.stringVal[i] = std::tolower(currCh);
 				word.append(std::to_string(currCh));
 			}
 			file.unget();
@@ -244,7 +244,7 @@ public:
 			{
 				tolower(word[i]);
 			}
-			
+
 			if (map.count(word) > 0)
 			{
 				token->type = map.find(word)->second;
@@ -255,7 +255,7 @@ public:
 			}
 
 		}
-			break;
+		break;
 
 		case 'a': case 'b': case 'c': case 'd': case 'e': case 'f': case 'g': case 'h': case 'i': case 'j': case 'k': case 'l': case 'm': case 'n': case 'o': case 'p': case 'q': case 'r': case 's': case 't': case 'u': case 'v': case 'w': case 'x': case 'y': case 'z':
 		{
@@ -264,7 +264,7 @@ public:
 			word.push_back(currCh);
 			for (int i = 1; isalpha(currCh = file.get()); i++)
 			{
-				token->val.stringVal[i] = currCh;
+				token->val.stringVal[i] = std::tolower(currCh);
 				word.push_back(currCh);
 			}
 			//maybe check if there are numbers in the identifier here?
@@ -274,7 +274,7 @@ public:
 			{
 				tolower(word[i]);
 			}
-			
+
 			if (map.count(word) > 0)
 			{
 				token->type = map.find(word)->second;
@@ -290,27 +290,33 @@ public:
 				{
 					token->type = id;
 				}
-				
+
 			}
 
 		}
-			break;
+		break;
 
 		case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
+		{
 			token->type = definition::literal_int;
 			token->val.intVal = currCh - '0';
 			while (isdigit(currCh = file.get()))
 				token->val.intVal = token->val.intVal * 10 + currCh - '0';
 			file.unget();
+		}
 			break;
 
 		case EOF:
+		{
 			token->type = definition::eof;
+		}
 			break;
 
 		default:
+		{
 			token->type = definition::unknown;
 			std::cout << "Unknown character: " << currCh << ", on line: " << lineNum << '\n';
+		}
 			break;
 		}
 
