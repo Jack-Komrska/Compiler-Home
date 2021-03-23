@@ -3,18 +3,13 @@
 #include "Scanner.h"
 #include <fstream>
 #include <string>
+#include "Parser.h"
 
 using namespace std;
 
 int main()
 {
-	Scanner test("test.txt"); //initializes the object, need to add the user selecting the file
-	test.addMaps(); // adds the maps
-	test.openFile(); // opens the file
-	while (test.ScanToken().type != eof)
-	{
+	Parser* parser = new Parser();
 
-	};
-	test.closeFile(); // closes the file
 }
 

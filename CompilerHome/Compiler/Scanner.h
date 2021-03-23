@@ -5,7 +5,8 @@
 #include <string>
 #include <map>
 
-class Scanner {
+class Scanner 
+{
 
 	std::map<std::string, definition> map; // the map
 
@@ -17,11 +18,16 @@ class Scanner {
 	int lineNum; //line number
 	
 public:
-	Scanner(std::string fName)
+	Scanner() {};
+
+	Scanner(std::string fName) 
 	{
 		lineNum = 1;
 		fileName = fName;
-	}
+		file.open(fileName);
+		addMaps();
+	};
+
 
 	void openFile()
 	{
@@ -319,7 +325,7 @@ public:
 		}
 			break;
 		}
-
+		
 		if (token->type != eof)
 		{
 			std::cout << '<' << token->type << ',';
@@ -338,6 +344,7 @@ public:
 			}
 			std::cout << '\n';
 		}
+		
 		return *token;
 	}
 };

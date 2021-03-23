@@ -143,6 +143,7 @@
     <ClCompile Include="Parser.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Parser.h" />
     <ClInclude Include="Scanner.h" />
     <ClInclude Include="SymbolTable.h" />
     <ClInclude Include="Token.h" />
