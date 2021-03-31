@@ -12,4 +12,3 @@ int main()
 	Parser* parser = new Parser();
 
 }
-

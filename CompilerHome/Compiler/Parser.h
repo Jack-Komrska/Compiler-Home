@@ -49,6 +49,10 @@ public:
 
 	void Identifier();
 
+	bool TypeMark(definition);
+
+	void Bound();
+
 	void Expression();
 
 	void ArithOp();

@@ -7,7 +7,6 @@
 
 class Scanner 
 {
-
 	std::map<std::string, definition> map; // the map
 
 	char currCh; // the current character
@@ -59,7 +58,7 @@ public:
 		map["int"] = num_integer;
 		map["bool"] = boolean;
 		map["double"] = num_double;
-		map["char"] = character;
+		//map["char"] = character;
 		map["string"] = str;
 		map["=="] = equal_op; //not searching for symbols atm, may need to at some point
 		map[":="] = sym_colEqual;
@@ -79,6 +78,19 @@ public:
 		
 	}
 
+	bool isAlphaNum(char cha)
+	{
+		if (isalpha(cha))
+		{
+			return true;
+		}
+		else if (isdigit(cha))
+		{
+			return true;
+		}
+		return false;
+	}
+
 	Token ScanToken()
 	{
 		Token* token = new Token();
@@ -94,15 +106,26 @@ public:
 			currCh = file.get();
 
 		switch (currCh) {
-		case '/':
+		case '/': //need to rework comments entirely
+		{
 			nextCh = file.get();
 			if (nextCh == '/') //finds the end of the line
 			{
-				file.seekg('\n');
+				while (currCh != '\n') //finishes once currCh is a new line
+				{
+					currCh = file.get();
+				}
+
+				while (!isAlphaNum(currCh))
+				{
+					currCh = file.get();
+				}
+
 			}
 			else if (nextCh == '*') //finds the end of the block comment
 			{
 				file.seekg('*/');
+
 			}
 			else
 			{
@@ -110,9 +133,11 @@ public:
 				token->type = definition::div_op;
 				token->val.stringVal[0] = currCh;
 			}
-			break;
+		}
+		break;
 
 		case '(': case ')': case '.': case '=': case ';': case '+': case '*': case '-': case '%': case '[': case ']': case ':': case '<': case '>':
+		{
 			if (currCh == '(')
 			{
 				token->type = definition::sym_lparen;
@@ -219,7 +244,8 @@ public:
 					token->val.stringVal[0] = currCh;
 				}
 			}
-			break;
+		}
+		break;
 
 		case '"':
 		{
@@ -268,7 +294,7 @@ public:
 			token->val.stringVal[0] = currCh;
 			std::string word;
 			word.push_back(currCh);
-			for (int i = 1; isalpha(currCh = file.get()); i++)
+			for (int i = 1; isalpha(currCh = file.get()); i++) //make a function that checks it is either a number or letter (should be pretty simple)
 			{
 				token->val.stringVal[i] = std::tolower(currCh);
 				word.push_back(currCh);
@@ -310,13 +336,13 @@ public:
 				token->val.intVal = token->val.intVal * 10 + currCh - '0';
 			file.unget();
 		}
-			break;
+		break;
 
 		case EOF:
 		{
 			token->type = definition::eof;
 		}
-			break;
+		break;
 
 		default:
 		{
