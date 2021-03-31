@@ -86,7 +86,7 @@ void Parser::Declaration() //calls either procedure/variable declaration
 		}
 		else
 		{
-			std::cout << "Error, the token we were expecting was not a procedure or a variable.";
+			std::cout << "Error, the token we were expecting was not a procedure or a variable.\n";
 		}
 	}
 	return;
@@ -128,12 +128,12 @@ void Parser::VariableDeclaration()
 						}
 						else
 						{
-							std::cout << "Error, we were expecting a right bracket.";
+							std::cout << "Error, we were expecting a right bracket.\n";
 						}
 					}
 					else
 					{
-						std::cout << "Error, we were expecting an integer.";
+						std::cout << "Error, we were expecting an integer.\n";
 					}
 				}
 				else if (token.type == sym_sc) //end the declaration, semi colon
@@ -142,22 +142,22 @@ void Parser::VariableDeclaration()
 				}
 				else
 				{
-					std::cout << "Error, we were expecting a semi colon or a bracket.";
+					std::cout << "Error, we were expecting a semi colon or a bracket.\n";
 				}
 			}
 			else
 			{
-				std::cout << "Error, we were expecting a type mark.";
+				std::cout << "Error, we were expecting a type mark.\n";
 			}
 		}
 		else
 		{
-			std::cout << "Error, we were expecting a colon.";
+			std::cout << "Error, we were expecting a colon.\n";
 		}
 	}
 	else
 	{
-		std::cout << "Error, we were expecting an identifier for a variable declaration.";
+		std::cout << "Error, we were expecting an identifier for a variable declaration.\n";
 	}
 }
 
@@ -172,6 +172,65 @@ bool Parser::TypeMark(definition type)
 
 void Parser::Statement() //assignment, if, loop, and return
 {
-	
+	token = scanner->ScanToken();
 
+	if (token.type == id)
+	{
+		AssignmentStatement();
+	}
+	else if (token.type == key_if)
+	{
+		IfStatement();
+	}
+	else if (token.type == key_for)
+	{
+		LoopStatement();
+	}
+	else if (token.type == key_return)
+	{
+		ReturnStatement();
+	}
+	else
+	{
+		std::cout << "Error, a statement declaration was expected.\n";
+	}
+}
+
+void Parser::AssignmentStatement()
+{
+	token = scanner->ScanToken();
+
+	if (token.type == id)
+	{
+
+	}
+	else
+	{
+		std::cout << "Error, we were expecting an identifier for a variable declaration.\n";
+	}
+}
+
+void Parser::Expression()
+{
+
+}
+
+void Parser::ArithOp()
+{
+
+}
+
+void Parser::IfStatement()
+{
+
+}
+
+void Parser::LoopStatement()
+{
+
+}
+
+void Parser::ReturnStatement()
+{
+	
 }
