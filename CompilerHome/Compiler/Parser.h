@@ -55,11 +55,19 @@ public:
 
 	void Expression();
 
+	void SubExpression();
+
 	void ArithOp();
 
-	void Relation();//may return the actual relation and not be void
+	void SubArithOp();
+
+	void Relation();
+
+	void SubRelation();
 
 	void Term();
+
+	void SubTerm();
 
 	void Factor();
 

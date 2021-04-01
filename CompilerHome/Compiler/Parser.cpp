@@ -39,6 +39,7 @@ void Parser::ProgramHeader() // add elses for errors
 			else
 			{
 				std::cout << "Error finding the key 'is', in program.\n";
+				//return; //need to not run the body
 			}
 		}
 		else
@@ -55,6 +56,7 @@ void Parser::ProgramHeader() // add elses for errors
 void Parser::ProgramBody() //contains declarations and statements
 {
 	Declaration();
+
 	if (token.type == key_progBegin) //second check
 	{
 		Statement();
@@ -163,7 +165,7 @@ void Parser::VariableDeclaration()
 
 bool Parser::TypeMark(definition type)
 {
-	if (type == num_integer || type == num_double || type == str || type == boolean)
+	if (type == num_integer || type == num_float || type == str || type == boolean)
 	{
 		return true;
 	}
@@ -198,6 +200,15 @@ void Parser::Statement() //assignment, if, loop, and return
 
 void Parser::AssignmentStatement()
 {
+	//check if the types match
+
+	Destination();
+	
+	Expression();
+}
+
+void Parser::Destination()
+{
 	token = scanner->ScanToken();
 
 	if (token.type == id)
@@ -215,9 +226,143 @@ void Parser::Expression()
 
 }
 
+void Parser::SubExpression()
+{
+
+}
+
 void Parser::ArithOp()
 {
 
+}
+
+void Parser::SubArithOp()
+{
+
+}
+
+void Parser::Relation()
+{
+
+}
+
+void Parser::SubRelation()
+{
+
+}
+
+void Parser::Term()
+{
+	Factor();
+
+	//token = scanner->ScanToken();
+	
+	//if (token.type == mult_op || token.type == div_op)
+	//{
+	SubTerm();
+	//}
+}
+
+void Parser::SubTerm()
+{
+	token = scanner->ScanToken();
+
+	if (token.type == mult_op || token.type == div_op)
+	{
+		Factor();
+
+		SubTerm();
+		
+		return;
+	}
+
+	std::cout << "Error, .\n";
+}
+
+void Parser::Factor()
+{
+	token = scanner->ScanToken();
+
+	if (token.type == sym_lparen)
+	{
+		Expression();
+
+		token = scanner->ScanToken();
+		if (token.type == sym_rparen)
+		{
+			return;
+		}
+		else
+		{
+			//error missing
+		}
+	}
+	else if (token.type == id)
+	{
+		//check if it is either a procedure call or a name
+		return;
+	}
+	else if (token.type == sub_op)
+	{
+		//check if procedure call or name
+		token = scanner->ScanToken();
+
+		if (token.type == id)
+		{
+			Name();
+		}
+		else if (token.type == literal_int || token.type == literal_float)
+		{
+			return;
+		}
+	}
+	else if (token.type == literal_string)
+	{
+		return;
+	}
+	else if (token.type == bool_true || token.type == bool_false)
+	{
+		return;
+	}
+	else
+	{
+		std::cout << "You done messed up.\n";
+	}
+	
+}
+
+void Parser::Name()
+{
+	token = scanner->ScanToken();
+
+	if (token.type == id)
+	{
+
+	}
+	else
+	{
+		std::cout << "Error, we were expecting an identifier for a variable declaration.\n";
+	}
+}
+
+void Parser::Number()
+{
+	token = scanner->ScanToken();
+
+	if (token.type == literal_int || token.type == literal_float)
+	{
+		return;
+	}
+}
+
+void Parser::String()
+{
+	token = scanner->ScanToken();
+
+	if (token.type == literal_string)
+	{
+		return;
+	}
 }
 
 void Parser::IfStatement()

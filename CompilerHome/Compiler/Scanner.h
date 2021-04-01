@@ -50,6 +50,7 @@ public:
 		map["procedure"] = key_procedure;
 		map["for"] = key_for;
 		map["if"] = key_if;
+		map["not"] = key_not;
 		map["return"] = key_return;
 		map["else"] = key_else;
 		map["or"] = key_or;
@@ -57,9 +58,11 @@ public:
 		map["const"] = key_const;
 		map["int"] = num_integer;
 		map["bool"] = boolean;
-		map["double"] = num_double;
+		map["float"] = num_float;
 		//map["char"] = character;
 		map["string"] = str;
+		map["true"] = bool_true;
+		map["false"] = bool_false;
 		map["=="] = equal_op; //not searching for symbols atm, may need to at some point
 		map[":="] = sym_colEqual;
 		map["*"] = mult_op;
@@ -75,6 +78,7 @@ public:
 		map[">"] = sym_great;
 		map["<="] = sym_lessEqual;
 		map[">="] = sym_greatEqual;
+		map["!-="] = sym_notEqual;
 		
 	}
 
@@ -124,8 +128,7 @@ public:
 			}
 			else if (nextCh == '*') //finds the end of the block comment
 			{
-				file.seekg('*/');
-
+				file.seekg('/*');
 			}
 			else
 			{
@@ -360,7 +363,7 @@ public:
 			{
 				std::cout << token->val.intVal << '>';
 			}
-			else if (token->type == literal_double)
+			else if (token->type == literal_float)
 			{
 				std::cout << token->val.doubleVal << '>';
 			}
