@@ -68,7 +68,7 @@ void Parser::ProgramBody() //contains declarations and statements
 {
 	Declaration(); //need some form of a while to keep on reading in declarations
 
-	if (token.type == key_progBegin) //second check
+	if (token.type == key_begin) //second check
 	{
 		Statement(); //need some form of a while to keep on reading in statements
 	}
@@ -97,11 +97,11 @@ void Parser::ProgramBody() //contains declarations and statements
 
 void Parser::Declaration() //calls either procedure/variable declaration
 {
-	while (token.type != key_progBegin) 
+	while (token.type != key_begin) 
 	{
 		token = scanner->CallScanner(); //scans in the scope of variable/procedure
 
-		if (token.type == key_progBegin)
+		if (token.type == key_begin)
 		{
 			break;
 		}
@@ -128,7 +128,103 @@ void Parser::Declaration() //calls either procedure/variable declaration
 
 void Parser::ProcedureDeclaration()
 {
+	ProcedureHeader();
 
+	ProcedureBody();
+}
+
+void Parser::ProcedureHeader()
+{
+	token = scanner->CallScanner();
+
+	if (token.type == id)
+	{
+		token = scanner->CallScanner();
+
+		if (token.type == sym_colon)
+		{
+			token = scanner->CallScanner();
+
+			if (TypeMark(token.type))
+			{
+				token = scanner->CallScanner();
+
+				if (token.type == sym_lparen)
+				{
+					ParameterList();
+
+					token = scanner->CallScanner();
+
+					if (token.type == sym_rparen)
+					{
+
+						return;
+					}
+					else
+					{
+						//error )
+					}
+				}
+				else
+				{
+					//error (
+				}
+			}
+			else
+			{
+				//error type mark
+			}
+		}
+		else
+		{
+			//error :
+		}
+	}
+	else
+	{
+		//error id
+	}
+}
+
+void Parser::ParameterList()
+{
+	
+}//need help
+
+void Parser::Parameter()
+{
+	VariableDeclaration();
+}
+
+void Parser::ProcedureBody()
+{
+	Declaration(); //need some form of a while to keep on reading in declarations
+
+	if (token.type == key_begin) //second check
+	{
+		Statement(); //need some form of a while to keep on reading in statements
+	}
+
+	token = scanner->CallScanner();
+
+	if (token.type == key_end)
+	{
+		token = scanner->CallScanner();
+
+		if (token.type == key_procedure)
+		{
+
+			return;
+		}
+		else
+		{
+			//error looking for procedure
+		}
+	}
+	else
+	{
+		//error looking for end
+	}
 }
 
 void Parser::VariableDeclaration()
@@ -142,7 +238,7 @@ void Parser::VariableDeclaration()
 		if (token.type == sym_colon)
 		{
 			token = scanner->CallScanner(); //scanning for the type mark
-			definition type = token.type;
+			definition type = token.type; //not sure if i need this for something but I am going to leave it here
 
 			if (TypeMark(token.type))
 			{
@@ -158,6 +254,7 @@ void Parser::VariableDeclaration()
 
 						if (token.type == sym_rbrack)
 						{
+							
 							return;
 						}
 						else
@@ -172,6 +269,7 @@ void Parser::VariableDeclaration()
 				}
 				else if (token.type == sym_sc) //end the declaration, semi colon
 				{
+					
 					return;
 				}
 				else
@@ -236,14 +334,19 @@ void Parser::AssignmentStatement()
 
 	Destination();
 	
+	token = scanner->CallScanner();
+
+	if (token.type != sym_colEqual)
+	{
+		//error :=
+	}
+
 	Expression();
 }
 
 void Parser::Destination()
 {
-	token = scanner->CallScanner();
-
-	if (token.type == id)
+	if (token.type == id) //already scanned
 	{
 
 
@@ -382,7 +485,7 @@ void Parser::SubTerm()
 		return;
 	}
 
-	std::cout << "Error, .\n";
+	std::cout << "Error, SubTerm.\n";
 }
 
 void Parser::Factor()
@@ -396,6 +499,7 @@ void Parser::Factor()
 		token = scanner->CallScanner();
 		if (token.type == sym_rparen)
 		{
+			
 			return;
 		}
 		else
@@ -405,7 +509,8 @@ void Parser::Factor()
 	}
 	else if (token.type == id)
 	{
-		//check if it is either a procedure call or a name
+		//check if it is either a procedure call or a name, symbol table look up
+		
 		return;
 	}
 	else if (token.type == sub_op)
@@ -419,20 +524,28 @@ void Parser::Factor()
 		}
 		else if (token.type == literal_int || token.type == literal_float)
 		{
+			
 			return;
 		}
 	}
+	else if (token.type == literal_int || token.type == literal_float)
+	{
+
+		return;
+	}
 	else if (token.type == literal_string)
 	{
+		
 		return;
 	}
 	else if (token.type == bool_true || token.type == bool_false)
 	{
+		
 		return;
 	}
 	else
 	{
-		std::cout << "You done messed up.\n";
+		std::cout << "Error, Factor.\n";
 	}
 	
 }

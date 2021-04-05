@@ -1,8 +1,8 @@
 ﻿  Main.cpp
-C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Scanner.h(315,22): warning C4018: '<': signed/unsigned mismatch
-C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Scanner.h(345,22): warning C4018: '<': signed/unsigned mismatch
+C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Scanner.h(321,22): warning C4018: '<': signed/unsigned mismatch
+C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Scanner.h(351,22): warning C4018: '<': signed/unsigned mismatch
   Parser.cpp
-C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Scanner.h(315,22): warning C4018: '<': signed/unsigned mismatch
-C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Scanner.h(345,22): warning C4018: '<': signed/unsigned mismatch
+C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Scanner.h(321,22): warning C4018: '<': signed/unsigned mismatch
+C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Scanner.h(351,22): warning C4018: '<': signed/unsigned mismatch
   Generating Code...
   Compiler.vcxproj -> C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Debug\Compiler.exe

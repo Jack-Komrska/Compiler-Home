@@ -4,6 +4,6 @@ program jackProgram is
 	global variable z : int;
 begin
 	x := 5;
-	y := 4;
-	z := x + y;
+	//y := 4;
+	//z := x + y;
 end program.

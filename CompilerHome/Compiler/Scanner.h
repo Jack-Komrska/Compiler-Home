@@ -43,7 +43,7 @@ public:
 		map["."] = key_period;
 		map["program"] = key_program;
 		map["is"] = key_is;
-		map["begin"] = key_progBegin;
+		map["begin"] = key_begin;
 		map["end"] = key_end;
 		map["variable"] = key_variable;
 		map["global"] = key_global;
@@ -96,6 +96,14 @@ public:
 		return false;
 	}
 
+	void getEndLine()
+	{
+		while (currCh != '\n') //get to the end of the line
+		{
+			currCh = file.get();
+		}
+	}
+
 	Token CallScanner()
 	{ //middle man for ignoring comments
 		Token temp;
@@ -122,23 +130,22 @@ public:
 			currCh = file.get();
 
 		switch (currCh) {
-		case '/': //need to rework comments entirely
+		case '/':
 		{
 			nextCh = file.get();
 			if (nextCh == '/') //finds the end of the line
 			{
 				token->type = comment;
 
-				while (currCh != '\n') //finishes once currCh is a new line
-				{
-					currCh = file.get();
-				}
+				getEndLine();
 
-				while (!isAlphaNum(currCh))
+				currCh = file.get();
+
+				if (currCh != '\t')
 				{
-					currCh = file.get();
+					file.unget();
 				}
-				file.unget();
+				
 			}
 			else if (nextCh == '*') //finds the end of the block comment
 			{
