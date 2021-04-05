@@ -139,12 +139,9 @@ public:
 
 				getEndLine();
 
-				currCh = file.get();
+				while (isspace(currCh = file.get()));
 
-				if (currCh != '\t')
-				{
-					file.unget();
-				}
+				file.unget();
 				
 			}
 			else if (nextCh == '*') //finds the end of the block comment

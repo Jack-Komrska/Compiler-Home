@@ -3,6 +3,7 @@
 #include "Scanner.h"
 #include <iostream>
 
+//*********ERRORS GRAB LINENUM FROM THE SCANNER**********
 
 Parser::Parser()
 {
