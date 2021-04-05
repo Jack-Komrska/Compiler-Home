@@ -20,7 +20,7 @@ void Parser::Program()
 
 	ProgramBody();
 
-	token = scanner->CallScanner();
+	token = scanner->CallScanner(true);
 
 	if (token.type == key_period)
 	{
@@ -34,15 +34,15 @@ void Parser::Program()
 
 void Parser::ProgramHeader() // add elses for errors
 {
-	token = scanner->CallScanner();
+	token = scanner->CallScanner(true);
 
 	if (token.type == key_program)
 	{
-		token = scanner->CallScanner();
+		token = scanner->CallScanner(true);
 
 		if (token.type == key_progName)
 		{
-			token = scanner->CallScanner();
+			token = scanner->CallScanner(true);
 
 			if (token.type == key_is)
 			{
@@ -74,11 +74,11 @@ void Parser::ProgramBody() //contains declarations and statements
 		Statement(); //need some form of a while to keep on reading in statements
 	}
 
-	token = scanner->CallScanner();
+	token = scanner->CallScanner(true);
 
 	if (token.type == key_end)
 	{
-		token = scanner->CallScanner();
+		token = scanner->CallScanner(true);
 
 		if (token.type == key_program)
 		{
@@ -100,7 +100,7 @@ void Parser::Declaration() //calls either procedure/variable declaration
 {
 	while (token.type != key_begin) 
 	{
-		token = scanner->CallScanner(); //scans in the scope of variable/procedure
+		token = scanner->CallScanner(true); //scans in the scope of variable/procedure
 
 		if (token.type == key_begin)
 		{
@@ -109,7 +109,7 @@ void Parser::Declaration() //calls either procedure/variable declaration
 
 		//will interact with symbol table and check the scope
 
-		token = scanner->CallScanner(); //determines if it is either a procedure/variable
+		token = scanner->CallScanner(true); //determines if it is either a procedure/variable
 
 		if (token.type == key_procedure)
 		{
@@ -136,25 +136,25 @@ void Parser::ProcedureDeclaration()
 
 void Parser::ProcedureHeader()
 {
-	token = scanner->CallScanner();
+	token = scanner->CallScanner(true);
 
 	if (token.type == id)
 	{
-		token = scanner->CallScanner();
+		token = scanner->CallScanner(true);
 
 		if (token.type == sym_colon)
 		{
-			token = scanner->CallScanner();
+			token = scanner->CallScanner(true);
 
 			if (TypeMark(token.type))
 			{
-				token = scanner->CallScanner();
+				token = scanner->CallScanner(true);
 
 				if (token.type == sym_lparen)
 				{
 					ParameterList();
 
-					token = scanner->CallScanner();
+					token = scanner->CallScanner(true);
 
 					if (token.type == sym_rparen)
 					{
@@ -206,11 +206,11 @@ void Parser::ProcedureBody()
 		Statement(); //need some form of a while to keep on reading in statements
 	}
 
-	token = scanner->CallScanner();
+	token = scanner->CallScanner(true);
 
 	if (token.type == key_end)
 	{
-		token = scanner->CallScanner();
+		token = scanner->CallScanner(true);
 
 		if (token.type == key_procedure)
 		{
@@ -230,28 +230,28 @@ void Parser::ProcedureBody()
 
 void Parser::VariableDeclaration()
 {
-	token = scanner->CallScanner(); //scanning for the identifier
+	token = scanner->CallScanner(true); //scanning for the identifier
 
 	if (token.type == id)
 	{
-		token = scanner->CallScanner(); //scanning for the colon
+		token = scanner->CallScanner(true); //scanning for the colon
 
 		if (token.type == sym_colon)
 		{
-			token = scanner->CallScanner(); //scanning for the type mark
+			token = scanner->CallScanner(true); //scanning for the type mark
 			definition type = token.type; //not sure if i need this for something but I am going to leave it here
 
 			if (TypeMark(token.type))
 			{
-				token = scanner->CallScanner();
+				token = scanner->CallScanner(true);
 
 				if (token.type == sym_lbrack)
 				{
-					token = scanner->CallScanner();
+					token = scanner->CallScanner(true);
 
 					if (token.type == literal_int)
 					{
-						token = scanner->CallScanner();
+						token = scanner->CallScanner(true);
 
 						if (token.type == sym_rbrack)
 						{
@@ -305,7 +305,7 @@ bool Parser::TypeMark(definition type)
 
 void Parser::Statement() //assignment, if, loop, and return
 {
-	token = scanner->CallScanner();
+	token = scanner->CallScanner(true);
 
 	if (token.type == id)
 	{
@@ -335,9 +335,13 @@ void Parser::AssignmentStatement()
 
 	Destination();
 	
-	token = scanner->CallScanner();
+	token = scanner->CallScanner(true);
 
 	if (token.type != sym_colEqual)
+	{
+		
+	}
+	else
 	{
 		//error :=
 	}
@@ -349,7 +353,6 @@ void Parser::Destination()
 {
 	if (token.type == id) //already scanned
 	{
-
 
 		return;
 	}
@@ -368,7 +371,7 @@ void Parser::Expression()
 
 void Parser::SubExpression()
 {
-	token = scanner->CallScanner();
+	token = scanner->CallScanner(true);
 
 	if (token.type == key_and)
 	{
@@ -400,7 +403,7 @@ void Parser::ArithOp()
 
 void Parser::SubArithOp()
 {
-	token = scanner->CallScanner();
+	token = scanner->CallScanner(true);
 
 	if (token.type == add_op)
 	{
@@ -427,7 +430,7 @@ void Parser::Relation()
 
 void Parser::SubRelation()
 {
-	token = scanner->CallScanner();
+	token = scanner->CallScanner(true);
 
 	if (token.type == sym_less)
 	{
@@ -465,17 +468,12 @@ void Parser::Term()
 {
 	Factor();
 
-	//token = scanner->CallScanner();
-	
-	//if (token.type == mult_op || token.type == div_op)
-	//{
 	SubTerm();
-	//}
 }
 
 void Parser::SubTerm()
 {
-	token = scanner->CallScanner();
+	token = scanner->CallScanner(true);
 
 	if (token.type == mult_op || token.type == div_op)
 	{
@@ -485,19 +483,19 @@ void Parser::SubTerm()
 		
 		return;
 	}
-
+	
 	std::cout << "Error, SubTerm.\n";
 }
 
 void Parser::Factor()
 {
-	token = scanner->CallScanner();
+	token = scanner->CallScanner(true);
 
 	if (token.type == sym_lparen)
 	{
 		Expression();
 
-		token = scanner->CallScanner();
+		token = scanner->CallScanner(true);
 		if (token.type == sym_rparen)
 		{
 			
@@ -517,7 +515,7 @@ void Parser::Factor()
 	else if (token.type == sub_op)
 	{
 		//check if procedure call or name
-		token = scanner->CallScanner();
+		token = scanner->CallScanner(true);
 
 		if (token.type == id)
 		{
@@ -525,18 +523,21 @@ void Parser::Factor()
 		}
 		else if (token.type == literal_int || token.type == literal_float)
 		{
-			
+			Number();
+
 			return;
 		}
 	}
 	else if (token.type == literal_int || token.type == literal_float)
 	{
+		Number();
 
 		return;
 	}
 	else if (token.type == literal_string)
 	{
-		
+		String();
+
 		return;
 	}
 	else if (token.type == bool_true || token.type == bool_false)
@@ -553,7 +554,7 @@ void Parser::Factor()
 
 void Parser::Name()
 {
-	token = scanner->CallScanner();
+	token = scanner->CallScanner(true);
 
 	if (token.type == id)
 	{
@@ -567,7 +568,7 @@ void Parser::Name()
 
 void Parser::Number()
 {
-	token = scanner->CallScanner();
+	token = scanner->CallScanner(true);
 
 	if (token.type == literal_int || token.type == literal_float)
 	{
@@ -577,41 +578,42 @@ void Parser::Number()
 
 void Parser::String()
 {
-	token = scanner->CallScanner();
+	token = scanner->CallScanner(true);
 
 	if (token.type == literal_string)
 	{
+
 		return;
 	}
 }
 
 void Parser::IfStatement()
 {
-	token = scanner->CallScanner();
+	token = scanner->CallScanner(true);
 
 	if (token.type == sym_lparen)
 	{
 		Expression();
 
-		token = scanner->CallScanner();
+		token = scanner->CallScanner(true);
 
 		if (token.type == sym_rparen)
 		{
-			token = scanner->CallScanner();
+			token = scanner->CallScanner(true);
 
 			if (token.type == key_then)
 			{
 				Statement();
 
-				token = scanner->CallScanner();
+				token = scanner->CallScanner(true);
 
 				if (token.type == sym_sc) //will need to account for multiple statements and to account for potential else statements
 				{
-					token = scanner->CallScanner();
+					token = scanner->CallScanner(true);
 
 					if (token.type == key_end)
 					{
-						token = scanner->CallScanner();
+						token = scanner->CallScanner(true);
 
 						if (token.type == key_if)
 						{
@@ -632,7 +634,7 @@ void Parser::IfStatement()
 				{
 					Statement();
 
-					token = scanner->CallScanner();
+					token = scanner->CallScanner(true);
 
 					if (token.type == sym_sc)
 					{
@@ -668,30 +670,30 @@ void Parser::IfStatement()
 
 void Parser::LoopStatement()
 {
-	token = scanner->CallScanner();
+	token = scanner->CallScanner(true);
 
 	if (token.type == sym_lparen)
 	{
 		AssignmentStatement();
 
-		token = scanner->CallScanner();
+		token = scanner->CallScanner(true);
 
 		if (token.type == sym_sc)
 		{
 			Expression();
 
-			token = scanner->CallScanner();
+			token = scanner->CallScanner(true);
 
 			if (token.type == sym_rparen)
 			{
 				//while loop for statements
 				Statement();
 
-				token = scanner->CallScanner();
+				token = scanner->CallScanner(true);
 
 				if (token.type == key_end)
 				{
-					token = scanner->CallScanner();
+					token = scanner->CallScanner(true);
 
 					if (token.type == key_for)
 					{
