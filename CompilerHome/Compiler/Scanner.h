@@ -44,17 +44,18 @@ public:
 		map["program"] = key_program;
 		map["is"] = key_is;
 		map["begin"] = key_progBegin;
-		map["end"] = key_progEnd;
+		map["end"] = key_end;
 		map["variable"] = key_variable;
 		map["global"] = key_global;
 		map["procedure"] = key_procedure;
 		map["for"] = key_for;
 		map["if"] = key_if;
+		map["then"] = key_then;
 		map["not"] = key_not;
 		map["return"] = key_return;
 		map["else"] = key_else;
-		map["or"] = key_or;
-		map["and"] = key_and;
+		map["|"] = key_or;
+		map["&"] = key_and;
 		map["const"] = key_const;
 		map["int"] = num_integer;
 		map["bool"] = boolean;
@@ -95,6 +96,17 @@ public:
 		return false;
 	}
 
+	Token CallScanner()
+	{ //middle man for ignoring comments
+		Token temp;
+		
+		do {
+			temp = ScanToken();
+		} while (temp.type == comment); //only reruns the loop if the type is a comment
+		
+		return temp;
+	}
+
 	Token ScanToken()
 	{
 		Token* token = new Token();
@@ -115,6 +127,8 @@ public:
 			nextCh = file.get();
 			if (nextCh == '/') //finds the end of the line
 			{
+				token->type = comment;
+
 				while (currCh != '\n') //finishes once currCh is a new line
 				{
 					currCh = file.get();
@@ -124,11 +138,34 @@ public:
 				{
 					currCh = file.get();
 				}
-
+				file.unget();
 			}
 			else if (nextCh == '*') //finds the end of the block comment
 			{
-				file.seekg('/*');
+				token->type = comment;
+
+				int commentBlocks = 1;
+				
+				while (commentBlocks > 0)
+				{
+					currCh = file.get();
+					if (currCh == '/')
+					{
+						nextCh = file.get();
+						if (nextCh == '*')
+						{
+							commentBlocks++;
+						}
+					}
+					else if (currCh == '*')
+					{
+						nextCh = file.get();
+						if (nextCh == '/')
+						{
+							commentBlocks--;
+						}
+					}
+				}
 			}
 			else
 			{
@@ -355,7 +392,7 @@ public:
 			break;
 		}
 		
-		if (token->type != eof)
+		if (token->type != eof && token->type != comment)
 		{
 			std::cout << '<' << token->type << ',';
 

@@ -18,19 +18,30 @@ void Parser::Program()
 	ProgramHeader();
 
 	ProgramBody();
+
+	token = scanner->CallScanner();
+
+	if (token.type == key_period)
+	{
+		std::cout << "End of program.\n";
+	}
+	else
+	{
+		//error .
+	}
 }
 
 void Parser::ProgramHeader() // add elses for errors
 {
-	token = scanner->ScanToken();
+	token = scanner->CallScanner();
 
 	if (token.type == key_program)
 	{
-		token = scanner->ScanToken();
+		token = scanner->CallScanner();
 
 		if (token.type == key_progName)
 		{
-			token = scanner->ScanToken();
+			token = scanner->CallScanner();
 
 			if (token.type == key_is)
 			{
@@ -55,11 +66,32 @@ void Parser::ProgramHeader() // add elses for errors
 
 void Parser::ProgramBody() //contains declarations and statements
 {
-	Declaration();
+	Declaration(); //need some form of a while to keep on reading in declarations
 
 	if (token.type == key_progBegin) //second check
 	{
-		Statement();
+		Statement(); //need some form of a while to keep on reading in statements
+	}
+
+	token = scanner->CallScanner();
+
+	if (token.type == key_end)
+	{
+		token = scanner->CallScanner();
+
+		if (token.type == key_program)
+		{
+			
+			return;
+		}
+		else
+		{
+			//error looking for program
+		}
+	}
+	else
+	{
+		//error looking for end
 	}
 }
 
@@ -67,7 +99,7 @@ void Parser::Declaration() //calls either procedure/variable declaration
 {
 	while (token.type != key_progBegin) 
 	{
-		token = scanner->ScanToken(); //scans in the scope of variable/procedure
+		token = scanner->CallScanner(); //scans in the scope of variable/procedure
 
 		if (token.type == key_progBegin)
 		{
@@ -76,7 +108,7 @@ void Parser::Declaration() //calls either procedure/variable declaration
 
 		//will interact with symbol table and check the scope
 
-		token = scanner->ScanToken(); //determines if it is either a procedure/variable
+		token = scanner->CallScanner(); //determines if it is either a procedure/variable
 
 		if (token.type == key_procedure)
 		{
@@ -101,28 +133,28 @@ void Parser::ProcedureDeclaration()
 
 void Parser::VariableDeclaration()
 {
-	token = scanner->ScanToken(); //scanning for the identifier
+	token = scanner->CallScanner(); //scanning for the identifier
 
 	if (token.type == id)
 	{
-		token = scanner->ScanToken(); //scanning for the colon
+		token = scanner->CallScanner(); //scanning for the colon
 
 		if (token.type == sym_colon)
 		{
-			token = scanner->ScanToken(); //scanning for the type mark
+			token = scanner->CallScanner(); //scanning for the type mark
 			definition type = token.type;
 
 			if (TypeMark(token.type))
 			{
-				token = scanner->ScanToken();
+				token = scanner->CallScanner();
 
 				if (token.type == sym_lbrack)
 				{
-					token = scanner->ScanToken();
+					token = scanner->CallScanner();
 
 					if (token.type == literal_int)
 					{
-						token = scanner->ScanToken();
+						token = scanner->CallScanner();
 
 						if (token.type == sym_rbrack)
 						{
@@ -174,7 +206,7 @@ bool Parser::TypeMark(definition type)
 
 void Parser::Statement() //assignment, if, loop, and return
 {
-	token = scanner->ScanToken();
+	token = scanner->CallScanner();
 
 	if (token.type == id)
 	{
@@ -209,11 +241,13 @@ void Parser::AssignmentStatement()
 
 void Parser::Destination()
 {
-	token = scanner->ScanToken();
+	token = scanner->CallScanner();
 
 	if (token.type == id)
 	{
 
+
+		return;
 	}
 	else
 	{
@@ -223,39 +257,111 @@ void Parser::Destination()
 
 void Parser::Expression()
 {
+	ArithOp();
 
+	SubExpression();
 }
 
 void Parser::SubExpression()
 {
+	token = scanner->CallScanner();
 
+	if (token.type == key_and)
+	{
+
+		return;
+	}
+	else if (token.type == key_or)
+	{
+
+		return;
+	}
+	else if (token.type == key_not)
+	{
+
+		return;
+	}
+	else
+	{
+		std::cout << "Error, we were expecting a form of expression.\n";
+	}
 }
 
 void Parser::ArithOp()
 {
+	Relation();
 
+	SubArithOp();
 }
 
 void Parser::SubArithOp()
 {
+	token = scanner->CallScanner();
 
+	if (token.type == add_op)
+	{
+
+		return;
+	}
+	else if (token.type == sub_op)
+	{
+
+		return;
+	}
+	else
+	{
+		std::cout << "Error, we were expecting an arithmetic operator.\n";
+	}
 }
 
 void Parser::Relation()
 {
+	Term();
 
+	SubRelation();
 }
 
 void Parser::SubRelation()
 {
+	token = scanner->CallScanner();
 
+	if (token.type == sym_less)
+	{
+
+		return;
+	}
+	else if (token.type == sym_lessEqual)
+	{
+
+		return;
+	}
+	else if (token.type == sym_great)
+	{
+
+		return;
+	}
+	else if (token.type == sym_greatEqual)
+	{
+
+		return;
+	}
+	else if (token.type == equal_op)
+	{
+
+		return;
+	}
+	else if (token.type == sym_notEqual)
+	{
+		
+		return;
+	}
 }
 
 void Parser::Term()
 {
 	Factor();
 
-	//token = scanner->ScanToken();
+	//token = scanner->CallScanner();
 	
 	//if (token.type == mult_op || token.type == div_op)
 	//{
@@ -265,7 +371,7 @@ void Parser::Term()
 
 void Parser::SubTerm()
 {
-	token = scanner->ScanToken();
+	token = scanner->CallScanner();
 
 	if (token.type == mult_op || token.type == div_op)
 	{
@@ -281,20 +387,20 @@ void Parser::SubTerm()
 
 void Parser::Factor()
 {
-	token = scanner->ScanToken();
+	token = scanner->CallScanner();
 
 	if (token.type == sym_lparen)
 	{
 		Expression();
 
-		token = scanner->ScanToken();
+		token = scanner->CallScanner();
 		if (token.type == sym_rparen)
 		{
 			return;
 		}
 		else
 		{
-			//error missing
+			std::cout << "Error, we were expecting a ')'.\n";
 		}
 	}
 	else if (token.type == id)
@@ -305,7 +411,7 @@ void Parser::Factor()
 	else if (token.type == sub_op)
 	{
 		//check if procedure call or name
-		token = scanner->ScanToken();
+		token = scanner->CallScanner();
 
 		if (token.type == id)
 		{
@@ -333,7 +439,7 @@ void Parser::Factor()
 
 void Parser::Name()
 {
-	token = scanner->ScanToken();
+	token = scanner->CallScanner();
 
 	if (token.type == id)
 	{
@@ -347,7 +453,7 @@ void Parser::Name()
 
 void Parser::Number()
 {
-	token = scanner->ScanToken();
+	token = scanner->CallScanner();
 
 	if (token.type == literal_int || token.type == literal_float)
 	{
@@ -357,7 +463,7 @@ void Parser::Number()
 
 void Parser::String()
 {
-	token = scanner->ScanToken();
+	token = scanner->CallScanner();
 
 	if (token.type == literal_string)
 	{
@@ -367,15 +473,140 @@ void Parser::String()
 
 void Parser::IfStatement()
 {
+	token = scanner->CallScanner();
+
+	if (token.type == sym_lparen)
+	{
+		Expression();
+
+		token = scanner->CallScanner();
+
+		if (token.type == sym_rparen)
+		{
+			token = scanner->CallScanner();
+
+			if (token.type == key_then)
+			{
+				Statement();
+
+				token = scanner->CallScanner();
+
+				if (token.type == sym_sc) //will need to account for multiple statements and to account for potential else statements
+				{
+					token = scanner->CallScanner();
+
+					if (token.type == key_end)
+					{
+						token = scanner->CallScanner();
+
+						if (token.type == key_if)
+						{
+
+							return;
+						}
+						else
+						{
+							//error looking for if
+						}
+					}
+					else
+					{
+						//error end
+					}
+				}
+				else if (token.type == key_else) //while loop for multiple elses? i think
+				{
+					Statement();
+
+					token = scanner->CallScanner();
+
+					if (token.type == sym_sc)
+					{
+
+						return;
+					}
+					else
+					{
+						//error sc
+					}
+				}
+				else
+				{
+					//error no sc or else
+				}
+			}
+			else
+			{
+				//error no then
+			}
+		}
+		else
+		{
+			std::cout << "Error, we were expecting a ')'.\n";
+		}
+	}
+	else
+	{
+		std::cout << "Error, we were expecting a '('.\n";
+	}
 
 }
 
 void Parser::LoopStatement()
 {
+	token = scanner->CallScanner();
 
+	if (token.type == sym_lparen)
+	{
+		AssignmentStatement();
+
+		token = scanner->CallScanner();
+
+		if (token.type == sym_sc)
+		{
+			Expression();
+
+			token = scanner->CallScanner();
+
+			if (token.type == sym_rparen)
+			{
+				//while loop for statements
+				Statement();
+
+				token = scanner->CallScanner();
+
+				if (token.type == key_end)
+				{
+					token = scanner->CallScanner();
+
+					if (token.type == key_for)
+					{
+
+						return;
+					}
+					else
+					{
+						//error for
+					}
+				}
+				else
+				{
+					//error end
+				}
+			}
+			else
+			{
+				//error )
+			}
+		}
+		else
+		{
+			//error sc
+		}
+	}
 }
 
 void Parser::ReturnStatement()
 {
-	
+	Expression();
 }
