@@ -82,7 +82,7 @@ public:
 		map["<="] = sym_lessEqual;
 		map[">="] = sym_greatEqual;
 		map["!-="] = sym_notEqual;
-		
+		map[","] = sym_comma;
 	}
 
 	bool isAlphaNum(char cha)
@@ -124,6 +124,7 @@ public:
 		case '/':
 		{
 			nextCh = file.get();
+			numGet++;
 			if (nextCh == '/') //finds the end of the line
 			{
 				token->type = comment;
@@ -179,7 +180,7 @@ public:
 		}
 		break;
 
-		case '(': case ')': case '.': case '=': case ';': case '+': case '*': case '-': case '%': case '[': case ']': case ':': case '<': case '>':
+		case '(': case ')': case '.': case '=': case ';': case '+': case '*': case '-': case '%': case '[': case ']': case ':': case '<': case '>': case ',':
 		{
 			if (currCh == '(')
 			{
@@ -295,6 +296,11 @@ public:
 					file.unget();
 					numGet--;
 				}
+			}
+			else if (currCh == ',')
+			{
+				token->type = definition::sym_comma;
+				token->val.stringVal[0] = currCh;
 			}
 		}
 		break;
@@ -356,7 +362,7 @@ public:
 				word.push_back(currCh);
 				numGet++;
 			}
-			numGet--;
+			//numGet--;
 			file.unget();
 
 			for (int i = 0; i < word.size(); i++)
@@ -413,6 +419,7 @@ public:
 
 		if (token->type != eof && token->type != comment)
 		{
+			std::cout << "peek: ";
 			std::cout << '<' << token->type << ',';
 
 			if (token->type == literal_int)
@@ -430,11 +437,14 @@ public:
 			std::cout << '\n';
 		}
 
-		for (int z = 0; z < numGet; z++)
+		if (token->type != comment)
 		{
-			file.unget();
+			for (int z = 0; z < numGet; z++)
+			{
+				file.unget();
+			}
 		}
-
+		
 		numGet = 0;
 
 		return *token;
@@ -476,55 +486,65 @@ public:
 		switch (currCh) {
 		case '/':
 		{
-			nextCh = file.get();
-			if (nextCh == '/') //finds the end of the line
 			{
-				token->type = comment;
-
-				getEndLine();
-
-				while (isspace(currCh = file.get()));
-
-				file.unget();
-				
-			}
-			else if (nextCh == '*') //finds the end of the block comment
-			{
-				token->type = comment;
-
-				int commentBlocks = 1;
-				
-				while (commentBlocks > 0)
+				nextCh = file.get();
+				if (nextCh == '/') //finds the end of the line
 				{
-					currCh = file.get();
-					if (currCh == '/')
+					token->type = comment;
+
+					getEndLine();
+
+					while (isspace(currCh))
 					{
-						nextCh = file.get();
-						if (nextCh == '*')
-						{
-							commentBlocks++;
-						}
+						currCh = file.get();
+						numGet++;
 					}
-					else if (currCh == '*')
+
+					file.unget();
+					numGet--;
+				}
+				else if (nextCh == '*') //finds the end of the block comment
+				{
+					token->type = comment;
+
+					int commentBlocks = 1;
+
+					while (commentBlocks > 0)
 					{
-						nextCh = file.get();
-						if (nextCh == '/')
+						currCh = file.get();
+						numGet++;
+						if (currCh == '/')
 						{
-							commentBlocks--;
+							nextCh = file.get();
+							numGet++;
+							if (nextCh == '*')
+							{
+								commentBlocks++;
+							}
+						}
+						else if (currCh == '*')
+						{
+							nextCh = file.get();
+							numGet++;
+							if (nextCh == '/')
+							{
+								commentBlocks--;
+							}
 						}
 					}
 				}
-			}
-			else
-			{
-				file.unget();
-				token->type = definition::div_op;
-				token->val.stringVal[0] = currCh;
+				else
+				{
+					file.unget();
+					numGet--;
+					token->type = definition::div_op;
+					token->val.stringVal[0] = currCh;
+				}
 			}
 		}
 		break;
 
-		case '(': case ')': case '.': case '=': case ';': case '+': case '*': case '-': case '%': case '[': case ']': case ':': case '<': case '>':
+		case '(': case ')': case '.': case '=': case ';': case '+': case '*': case '-': case '%': case '[': case ']': case ':': case '<': case '>': case ',':
 		{
 			if (currCh == '(')
 			{
@@ -631,6 +651,11 @@ public:
 					token->type = definition::sym_great;
 					token->val.stringVal[0] = currCh;
 				}
+			}
+			else if (currCh == ',')
+			{
+				token->type = definition::sym_comma;
+				token->val.stringVal[0] = currCh;
 			}
 		}
 		break;
@@ -759,6 +784,14 @@ public:
 			std::cout << '\n';
 		}
 		
+		if (token->type != comment)
+		{
+			for (int z = 0; z < numGet; z++)
+			{
+				file.unget();
+			}
+		}
+
 		return *token;
 	}
 };
