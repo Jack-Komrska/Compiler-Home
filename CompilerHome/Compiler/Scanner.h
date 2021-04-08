@@ -332,7 +332,7 @@ public:
 				numGet++;
 			}
 			file.unget();
-			numGet--;
+			//numGet--;
 
 			for (int i = 0; i < word.size(); i++)
 			{

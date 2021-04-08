@@ -22,10 +22,12 @@ void Parser::Program()
 
 	ProgramBody();
 
-	token = scanner->CallScanner(true);
+	Token tempToken = scanner->CallScanner(false);
 
-	if (token.type == key_period)
+	if (tempToken.type == key_period)
 	{
+		token = scanner->CallScanner(true);
+
 		std::cout << "End of program.\n";
 	}
 	else
@@ -36,18 +38,24 @@ void Parser::Program()
 
 void Parser::ProgramHeader() // add elses for errors
 {
-	token = scanner->CallScanner(true);
+	Token tempToken = scanner->CallScanner(false);
 
-	if (token.type == key_program)
+	if (tempToken.type == key_program)
 	{
 		token = scanner->CallScanner(true);
 
-		if (token.type == key_progName)
+		tempToken = scanner->CallScanner(false);
+
+		if (tempToken.type == key_progName)
 		{
 			token = scanner->CallScanner(true);
 
-			if (token.type == key_is)
+			tempToken = scanner->CallScanner(false);
+
+			if (tempToken.type == key_is)
 			{
+				token = scanner->CallScanner(true);
+
 				return;
 			}
 			else
@@ -71,21 +79,17 @@ void Parser::ProgramBody() //contains declarations and statements
 {
 	Declaration(); //need some form of a while to keep on reading in declarations
 
-	if (token.type == key_begin) //second check
+	
+	Token tempToken = scanner->CallScanner(false);
+	while (tempToken.type != key_end) 
 	{
 		Statement(); //need some form of a while to keep on reading in statements
-
-		Token tempToken = scanner->CallScanner(false);
-
-		if (tempToken.type != sym_sc)
-		{
-			
-		}
 		
-		token = scanner->CallScanner(true);
+		tempToken = scanner->CallScanner(false);
 	}
+	
 
-	Token tempToken = scanner->CallScanner(false);
+	//tempToken = scanner->CallScanner(false);
 
 	if (tempToken.type == key_end)
 	{
@@ -115,23 +119,28 @@ void Parser::Declaration() //calls either procedure/variable declaration
 {
 	while (token.type != key_begin) 
 	{
-		token = scanner->CallScanner(true); //scans in the scope of variable/procedure
+		Token tempToken = scanner->CallScanner(false); //scans in the scope of variable/procedure
 
-		if (token.type == key_begin)
+		if (tempToken.type == key_begin)
 		{
+			token = scanner->CallScanner(true);
 			break;
 		}
 
+		token = scanner->CallScanner(true);
+
 		//will interact with symbol table and check the scope
 
-		token = scanner->CallScanner(true); //determines if it is either a procedure/variable
+		tempToken = scanner->CallScanner(false); //determines if it is either a procedure/variable
 
-		if (token.type == key_procedure)
+		if (tempToken.type == key_procedure)
 		{
+			token = scanner->CallScanner(true);
 			ProcedureDeclaration();
 		}
-		else if (token.type == key_variable)
+		else if (tempToken.type == key_variable)
 		{
+			token = scanner->CallScanner(true);
 			VariableDeclaration();
 		}
 		else
@@ -139,7 +148,6 @@ void Parser::Declaration() //calls either procedure/variable declaration
 			std::cout << "Error, the token we were expecting was not a procedure or a variable.\n";
 		}
 	}
-	return;
 }
 
 void Parser::ProcedureDeclaration()
@@ -151,28 +159,37 @@ void Parser::ProcedureDeclaration()
 
 void Parser::ProcedureHeader()
 {
-	token = scanner->CallScanner(true);
+	Token tempToken = scanner->CallScanner(false);
 
-	if (token.type == id)
+	if (tempToken.type == id)
 	{
 		token = scanner->CallScanner(true);
 
-		if (token.type == sym_colon)
+		tempToken = scanner->CallScanner(false);
+
+		if (tempToken.type == sym_colon)
 		{
 			token = scanner->CallScanner(true);
 
-			if (TypeMark(token.type))
+			tempToken = scanner->CallScanner(false);
+
+			if (TypeMark(tempToken.type))
 			{
 				token = scanner->CallScanner(true);
 
-				if (token.type == sym_lparen)
-				{
-					ParameterList();
+				tempToken = scanner->CallScanner(false);
 
+				if (tempToken.type == sym_lparen)
+				{
 					token = scanner->CallScanner(true);
 
-					if (token.type == sym_rparen)
+					ParameterList();
+
+					tempToken = scanner->CallScanner(false);
+
+					if (tempToken.type == sym_rparen)
 					{
+						token = scanner->CallScanner(true);
 
 						return;
 					}
@@ -234,19 +251,26 @@ void Parser::ProcedureBody()
 {
 	Declaration(); //need some form of a while to keep on reading in declarations
 
-	if (token.type == key_begin) //second check
-	{
-		Statement(); //need some form of a while to keep on reading in statements
-	}
+	Token tempToken = scanner->CallScanner(false);
 
-	token = scanner->CallScanner(true);
-
-	if (token.type == key_end)
+	if (tempToken.type == key_begin) //second check
 	{
 		token = scanner->CallScanner(true);
 
-		if (token.type == key_procedure)
+		Statement(); //need some form of a while to keep on reading in statements
+	}
+
+	tempToken = scanner->CallScanner(false);
+
+	if (tempToken.type == key_end)
+	{
+		token = scanner->CallScanner(true);
+
+		tempToken = scanner->CallScanner(false);
+
+		if (tempToken.type == key_procedure)
 		{
+			token = scanner->CallScanner(true);
 
 			return;
 		}
@@ -263,34 +287,45 @@ void Parser::ProcedureBody()
 
 void Parser::VariableDeclaration()
 {
-	token = scanner->CallScanner(true); //scanning for the identifier
+	Token tempToken = scanner->CallScanner(false); //scanning for the identifier
 
-	if (token.type == id)
+	if (tempToken.type == id)
 	{
 		token = scanner->CallScanner(true); //scanning for the colon
 
-		if (token.type == sym_colon)
+		tempToken = scanner->CallScanner(false);
+
+		if (tempToken.type == sym_colon)
 		{
 			token = scanner->CallScanner(true); //scanning for the type mark
-			definition type = token.type; //not sure if i need this for something but I am going to leave it here
+			//definition type = token.type; //not sure if i need this for something but I am going to leave it here
 
-			if (TypeMark(token.type))
+			tempToken = scanner->CallScanner(false);
+
+			if (TypeMark(tempToken.type))
 			{
 				token = scanner->CallScanner(true);
 
-				if (token.type == sym_lbrack)
+				tempToken = scanner->CallScanner(false);
+
+				if (tempToken.type == sym_lbrack)
 				{
 					token = scanner->CallScanner(true);
 
-					if (token.type == literal_int) //bound check
-					{
-						Number();
+					tempToken = scanner->CallScanner(false);
 
+					if (tempToken.type == literal_int) //bound check
+					{
 						token = scanner->CallScanner(true);
 
-						if (token.type == sym_rbrack)
+						Number();
+
+						tempToken = scanner->CallScanner(false);
+
+						if (tempToken.type == sym_rbrack)
 						{
-							
+							token = scanner->CallScanner(true);
+
 							return;
 						}
 						else
@@ -303,9 +338,10 @@ void Parser::VariableDeclaration()
 						std::cout << "Error, we were expecting an integer.\n";
 					}
 				}
-				else if (token.type == sym_sc) //end the declaration, semi colon
+				else if (tempToken.type == sym_sc) //end the declaration, semi colon
 				{
-					
+					token = scanner->CallScanner(true);
+
 					return;
 				}
 				else
@@ -340,28 +376,45 @@ bool Parser::TypeMark(definition type)
 
 void Parser::Statement() //assignment, if, loop, and return
 {
-	token = scanner->CallScanner(true);
+	Token tempToken = scanner->CallScanner(false);
 
-	if (token.type == id)
+	if (tempToken.type == id)
 	{
+		token = scanner->CallScanner(true);
+
 		AssignmentStatement();
 	}
-	else if (token.type == key_if)
+	else if (tempToken.type == key_if)
 	{
+		token = scanner->CallScanner(true);
+
 		IfStatement();
 	}
-	else if (token.type == key_for)
+	else if (tempToken.type == key_for)
 	{
+		token = scanner->CallScanner(true);
+
 		LoopStatement();
 	}
-	else if (token.type == key_return)
+	else if (tempToken.type == key_return)
 	{
+		token = scanner->CallScanner(true);
+
 		ReturnStatement();
 	}
 	else
 	{
 		std::cout << "Error, a statement declaration was expected.\n";
 	}
+
+	tempToken = scanner->CallScanner(false);
+
+	if (tempToken.type != sym_sc)
+	{
+		std::cout << "not a ;\n";
+	}
+
+	token = scanner->CallScanner(true);
 }
 
 void Parser::AssignmentStatement()
@@ -372,7 +425,7 @@ void Parser::AssignmentStatement()
 	
 	Token tempToken = scanner->CallScanner(false);
 
-	if (token.type != sym_colEqual)
+	if (tempToken.type == sym_colEqual)
 	{
 		token = scanner->CallScanner(true);
 	}
@@ -382,8 +435,6 @@ void Parser::AssignmentStatement()
 	}
 
 	Expression();
-
-
 }
 
 void Parser::Destination()
@@ -401,7 +452,7 @@ void Parser::Destination()
 
 void Parser::Expression()
 {
-	std::cout << "Expression\n";
+	//std::cout << "Expression\n"; //for testing
 	ArithOp();
 
 	SubExpression();
@@ -409,22 +460,31 @@ void Parser::Expression()
 
 void Parser::SubExpression()
 {
-	std::cout << "SubExpression\n";
+	//std::cout << "SubExpression\n";
 	Token tempToken = scanner->CallScanner(false);
-
+	
 	if (tempToken.type == key_and)
 	{
 		token = scanner->CallScanner(true);
+
+		ArithOp();
+
 		return;
 	}
 	else if (tempToken.type == key_or)
 	{
 		token = scanner->CallScanner(true);
+
+		ArithOp();
+
 		return;
 	}
 	else if (tempToken.type == key_not)
 	{
 		token = scanner->CallScanner(true);
+
+		ArithOp();
+
 		return;
 	}
 	/*else
@@ -444,14 +504,20 @@ void Parser::SubArithOp()
 {
 	Token tempToken = scanner->CallScanner(false);
 
-	if (token.type == add_op)
+	if (tempToken.type == add_op)
 	{
 		token = scanner->CallScanner(true);
+
+		Relation();
+
 		return;
 	}
-	else if (token.type == sub_op)
+	else if (tempToken.type == sub_op)
 	{
 		token = scanner->CallScanner(true);
+
+		Relation();
+
 		return;
 	}
 	/*else
@@ -475,31 +541,49 @@ void Parser::SubRelation()
 	if (tempToken.type == sym_less)
 	{
 		token = scanner->CallScanner(true);
+
+		Term();
+
 		return;
 	}
 	else if (tempToken.type == sym_lessEqual)
 	{
 		token = scanner->CallScanner(true);
+
+		Term();
+
 		return;
 	}
 	else if (tempToken.type == sym_great)
 	{
 		token = scanner->CallScanner(true);
+
+		Term();
+
 		return;
 	}
 	else if (tempToken.type == sym_greatEqual)
 	{
 		token = scanner->CallScanner(true);
+
+		Term();
+
 		return;
 	}
 	else if (tempToken.type == equal_op)
 	{
 		token = scanner->CallScanner(true);
+
+		Term();
+
 		return;
 	}
 	else if (tempToken.type == sym_notEqual)
 	{
 		token = scanner->CallScanner(true);
+
+		Term();
+
 		return;
 	}
 }
@@ -537,7 +621,7 @@ void Parser::Factor()
 		Expression();
 
 		tempToken = scanner->CallScanner(false);
-		if (token.type == sym_rparen)
+		if (tempToken.type == sym_rparen)
 		{
 			token = scanner->CallScanner(true);
 			return;
