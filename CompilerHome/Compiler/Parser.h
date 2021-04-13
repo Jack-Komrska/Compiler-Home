@@ -2,11 +2,13 @@
 #include <iostream>
 #include "Token.h"
 #include "Scanner.h"
+#include "SymbolTable.h"
 #include <fstream>
 #include <string>
 
 class Parser
 {
+	//SymbolTable SymTab;
 	Scanner *scanner;
 	Token token;
 

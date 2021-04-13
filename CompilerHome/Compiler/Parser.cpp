@@ -4,7 +4,6 @@
 #include <iostream>
 
 //*********ERRORS GRAB LINENUM FROM THE SCANNER**********
-//*********ADD TEMP TOKEN EVERYWHERE ELSE****************
 
 
 Parser::Parser()
@@ -18,6 +17,8 @@ Parser::Parser()
 
 void Parser::Program()
 {
+	//SymTab.AddScope();
+
 	ProgramHeader();
 
 	ProgramBody();
@@ -126,8 +127,17 @@ void Parser::Declaration() //calls either procedure/variable declaration
 			token = scanner->CallScanner(true);
 			break;
 		}
+		else if (tempToken.type == key_global)
+		{
+			token = scanner->CallScanner(true);
+		}
+		else if (tempToken.type == key_procedure)
+		{
+			//SymTab.AddScope();
+			token = scanner->CallScanner(true);
+		}
 
-		token = scanner->CallScanner(true);
+		
 
 		//will interact with symbol table and check the scope
 

@@ -4,6 +4,7 @@
 Symbol::Symbol()
 {
 	identifier = "";
+	scopeName = "";
 	type = unknown;
 	isProc = false;
 	isGlob = false;
@@ -13,6 +14,11 @@ Symbol::Symbol()
 std::string Symbol::getIdentifer()
 {
 	return identifier;
+}
+
+std::string Symbol::getScopeName()
+{
+	return scopeName;
 }
 
 int Symbol::getType()
@@ -38,6 +44,11 @@ bool Symbol::getArray()
 void Symbol::setIdentifier(std::string str)
 {
 	identifier = str;
+}
+
+void Symbol::setScopeName(std::string str)
+{
+	scopeName = str;
 }
 
 void Symbol::setType(int type)
