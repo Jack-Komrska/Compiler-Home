@@ -51,22 +51,22 @@ void Symbol::setScopeName(std::string str)
 	scopeName = str;
 }
 
-void Symbol::setType(int type)
+void Symbol::setType(int input)
 {
-	type = type;
+	type = input;
 }
 
-void Symbol::setIsProcedure(bool isProc)
+void Symbol::setIsProcedure(bool proc)
 {
-	isProc = isProc;
+	isProc = proc;
 }
 
-void Symbol::setIsGlobal(bool isGlob)
+void Symbol::setIsGlobal(bool global)
 {
-	isGlob = isGlob;
+	isGlob = global;
 }
 
-void Symbol::setIsArr(bool isArr)
+void Symbol::setIsArr(bool arr)
 {
-	isArr = isArr;
+	isArr = arr;
 }

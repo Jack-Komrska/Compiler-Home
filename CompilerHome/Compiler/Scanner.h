@@ -59,6 +59,7 @@ public:
 		map["|"] = key_or;
 		map["&"] = key_and;
 		map["const"] = key_const;
+		map["integer"] = num_integer;
 		map["int"] = num_integer;
 		map["bool"] = boolean;
 		map["float"] = num_float;
@@ -428,7 +429,7 @@ public:
 			}
 			else if (token->type == literal_float)
 			{
-				std::cout << token->val.doubleVal << '>';
+				std::cout << token->val.stringVal << '>';
 			}
 			else
 			{
@@ -775,7 +776,7 @@ public:
 			}
 			else if (token->type == literal_float)
 			{
-				std::cout << token->val.doubleVal << '>';
+				std::cout << token->val.floatVal << '>';
 			}
 			else
 			{

@@ -8,9 +8,10 @@
 
 class Parser
 {
-	//SymbolTable SymTab;
+	SymbolTable SymTab;
 	Scanner *scanner;
 	Token token;
+	Scope tempScope;
 
 public:
 	Parser();
@@ -29,7 +30,7 @@ public:
 
 	void ProcedureBody();
 
-	void ProcedureCall();
+	Symbol ProcedureCall();
 
 	void ParameterList();
 
@@ -41,7 +42,7 @@ public:
 
 	void AssignmentStatement();
 
-	void Destination();
+	Symbol Destination();
 
 	void IfStatement();
 
@@ -55,30 +56,30 @@ public:
 
 	void Bound();
 
-	void Expression();
+	Symbol Expression();
 
-	void SubExpression();
+	Symbol SubExpression();
 
-	void ArithOp();
+	Symbol ArithOp();
 
-	void SubArithOp();
+	Symbol SubArithOp();
 
-	void Relation();
+	Symbol Relation();
 
-	void SubRelation();
+	Symbol SubRelation();
 
-	void Term();
+	Symbol Term();
 
-	void SubTerm();
+	Symbol SubTerm();
 
-	void Factor();
+	Symbol Factor();
 
-	void Name();
+	Symbol Name();
 
-	void ArugmentList();
+	void ArgumentList();
 
-	void Number(); //returns an int or double
+	Symbol Number(); //returns an int or double
 
-	void String(); //yet again, returns a String most likely and not a number
+	Symbol String(); //yet again, returns a String most likely and not a number
 
 };

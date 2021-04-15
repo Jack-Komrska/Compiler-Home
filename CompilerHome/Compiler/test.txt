@@ -1,9 +1,9 @@
 program jackProgram is
-	global variable x : int;
+	global variable x : integer;
 	global variable y : int;
-	global variable z : int;
+	//global variable z : int;
 begin
 	x := 5;
 	y := 4;
-	z:= x + 5;
+	//z:= x + y;
 end program.

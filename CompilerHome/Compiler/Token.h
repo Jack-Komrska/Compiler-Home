@@ -11,6 +11,6 @@ public:
 	union { //holds the value depending on the type
 		char stringVal[256];
 		int intVal;
-		double doubleVal;
+		double floatVal;
 	} val;
 };

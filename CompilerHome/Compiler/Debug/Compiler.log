@@ -1,20 +1,11 @@
-﻿  Main.cpp
-C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Scanner.h(337,22): warning C4018: '<': signed/unsigned mismatch
-C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Scanner.h(368,22): warning C4018: '<': signed/unsigned mismatch
-C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Scanner.h(688,22): warning C4018: '<': signed/unsigned mismatch
-C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Scanner.h(718,22): warning C4018: '<': signed/unsigned mismatch
-  Parser.cpp
-C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Scanner.h(337,22): warning C4018: '<': signed/unsigned mismatch
-C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Scanner.h(368,22): warning C4018: '<': signed/unsigned mismatch
-C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Scanner.h(688,22): warning C4018: '<': signed/unsigned mismatch
-C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Scanner.h(718,22): warning C4018: '<': signed/unsigned mismatch
-  Scope.cpp
-  Symbol.cpp
-  SymbolTable.cpp
-C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\SymbolTable.cpp(17,20): warning C4018: '<': signed/unsigned mismatch
-C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\SymbolTable.cpp(56,20): warning C4018: '<': signed/unsigned mismatch
-  Generating Code...
-C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\SymbolTable.cpp(24): warning C4715: 'SymbolTable::GetScope': not all control paths return a value
-C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\SymbolTable.cpp(50): warning C4715: 'SymbolTable::LookupSymbol': not all control paths return a value
-C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Symbol.h(39): warning C4717: 'Symbol::operator==': recursive on all control paths, function will cause runtime stack overflow
+﻿  Parser.cpp
+C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Scanner.h(338,22): warning C4018: '<': signed/unsigned mismatch
+C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Scanner.h(369,22): warning C4018: '<': signed/unsigned mismatch
+C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Scanner.h(689,22): warning C4018: '<': signed/unsigned mismatch
+C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Scanner.h(719,22): warning C4018: '<': signed/unsigned mismatch
+C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Parser.cpp(680): warning C4715: 'Parser::SubTerm': not all control paths return a value
+C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Parser.cpp(777): warning C4715: 'Parser::Name': not all control paths return a value
+C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Parser.cpp(800): warning C4715: 'Parser::Number': not all control paths return a value
+C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Parser.cpp(812): warning C4715: 'Parser::String': not all control paths return a value
+C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Parser.cpp(765): warning C4715: 'Parser::Factor': not all control paths return a value
   Compiler.vcxproj -> C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Debug\Compiler.exe

@@ -17,7 +17,10 @@ Parser::Parser()
 
 void Parser::Program()
 {
-	//SymTab.AddScope();
+	Scope local; //the default local scope
+	local.name = "local";
+	local.scopeLoc = SymTab.getScopeLoc();
+	SymTab.AddScope(local); //adding the global scope at the very beginning
 
 	ProgramHeader();
 
@@ -130,21 +133,32 @@ void Parser::Declaration() //calls either procedure/variable declaration
 		else if (tempToken.type == key_global)
 		{
 			token = scanner->CallScanner(true);
+			if (SymTab.getScopeLoc() < 2)
+			{
+				Scope global;
+				global.name = "global";
+				global.scopeLoc = SymTab.getScopeLoc();
+				SymTab.AddScope(global);
+			}
+
+			tempToken = scanner->CallScanner(false);
+			tempScope.name = "global";
+
+			if (tempToken.type == key_variable)
+			{
+				token = scanner->CallScanner(true);
+				
+				VariableDeclaration();
+			}
+			else if (tempToken.type == key_procedure)
+			{
+				token = scanner->CallScanner(true);
+				ProcedureDeclaration();
+			}
 		}
 		else if (tempToken.type == key_procedure)
 		{
 			//SymTab.AddScope();
-			token = scanner->CallScanner(true);
-		}
-
-		
-
-		//will interact with symbol table and check the scope
-
-		tempToken = scanner->CallScanner(false); //determines if it is either a procedure/variable
-
-		if (tempToken.type == key_procedure)
-		{
 			token = scanner->CallScanner(true);
 			ProcedureDeclaration();
 		}
@@ -153,9 +167,11 @@ void Parser::Declaration() //calls either procedure/variable declaration
 			token = scanner->CallScanner(true);
 			VariableDeclaration();
 		}
+		//tempToken = scanner->CallScanner(false); //determines if it is either a procedure/variable
+		
 		else
 		{
-			std::cout << "Error, the token we were expecting was not a procedure or a variable.\n";
+			std::cout << "Error, declaration.\n";
 		}
 	}
 }
@@ -301,7 +317,21 @@ void Parser::VariableDeclaration()
 
 	if (tempToken.type == id)
 	{
-		token = scanner->CallScanner(true); //scanning for the colon
+		token = scanner->CallScanner(true);
+		
+		Symbol id;
+		id.setIdentifier(token.val.stringVal);
+		if (tempScope.name == "global")
+		{
+			id.setIsGlobal(true);
+		}
+		else
+		{
+			id.setIsGlobal(false);
+		}
+		id.setIsProcedure(false);
+		id.setType(0);
+		id.setScopeName(tempScope.name);
 
 		tempToken = scanner->CallScanner(false);
 
@@ -322,6 +352,8 @@ void Parser::VariableDeclaration()
 				{
 					token = scanner->CallScanner(true);
 
+					id.setIsArr(true);
+
 					tempToken = scanner->CallScanner(false);
 
 					if (tempToken.type == literal_int) //bound check
@@ -336,7 +368,16 @@ void Parser::VariableDeclaration()
 						{
 							token = scanner->CallScanner(true);
 
-							return;
+							tempToken = scanner->CallScanner(false);
+							if (tempToken.type == sym_sc)
+							{
+								token = scanner->CallScanner(true);
+								return;
+							}
+							else
+							{
+								//error sc
+							}
 						}
 						else
 						{
@@ -351,7 +392,8 @@ void Parser::VariableDeclaration()
 				else if (tempToken.type == sym_sc) //end the declaration, semi colon
 				{
 					token = scanner->CallScanner(true);
-
+					id.setIsArr(false);
+					SymTab.InsertSymbol(id);
 					return;
 				}
 				else
@@ -431,8 +473,8 @@ void Parser::AssignmentStatement()
 {
 	//check if the types match
 
-	Destination();
-	
+	Symbol dest = Destination();
+	std::cout << "Symbol identifier: " + dest.getIdentifer() << std::endl;
 	Token tempToken = scanner->CallScanner(false);
 
 	if (tempToken.type == sym_colEqual)
@@ -443,32 +485,37 @@ void Parser::AssignmentStatement()
 	{
 		//error :=
 	}
-
-	Expression();
+	Symbol exp = Expression();
+	
+	//type check here
 }
 
-void Parser::Destination()
+Symbol Parser::Destination()
 {
 	if (token.type == id) //already scanned
 	{
-
-		return;
+		return SymTab.FindSymbol(token.val.stringVal);
 	}
 	else
 	{
 		std::cout << "Error, we were expecting an identifier for a variable declaration.\n";
+		return Symbol();
 	}
 }
 
-void Parser::Expression()
+Symbol Parser::Expression()
 {
-	//std::cout << "Expression\n"; //for testing
+	//std::cout << "Expression\n";
+	Symbol expr;
+
 	ArithOp();
 
 	SubExpression();
+
+	return expr;
 }
 
-void Parser::SubExpression()
+Symbol Parser::SubExpression()
 {
 	//std::cout << "SubExpression\n";
 	Token tempToken = scanner->CallScanner(false);
@@ -477,40 +524,40 @@ void Parser::SubExpression()
 	{
 		token = scanner->CallScanner(true);
 
-		ArithOp();
+		//ArithOp();
 
-		return;
+		return ArithOp();
 	}
 	else if (tempToken.type == key_or)
 	{
 		token = scanner->CallScanner(true);
 
-		ArithOp();
+		//ArithOp();
 
-		return;
+		return ArithOp();
 	}
 	else if (tempToken.type == key_not)
 	{
 		token = scanner->CallScanner(true);
 
-		ArithOp();
+		//ArithOp();
 
-		return;
+		return ArithOp();;
 	}
-	/*else
-	{
-		std::cout << "Error, we were expecting a form of expression.\n";
-	}*/
+
+	return Symbol();
 }
 
-void Parser::ArithOp()
+Symbol Parser::ArithOp()
 {
 	Relation();
 
 	SubArithOp();
+
+	return Symbol();
 }
 
-void Parser::SubArithOp()
+Symbol Parser::SubArithOp()
 {
 	Token tempToken = scanner->CallScanner(false);
 
@@ -518,33 +565,31 @@ void Parser::SubArithOp()
 	{
 		token = scanner->CallScanner(true);
 
-		Relation();
+		//Relation();
 
-		return;
+		return Relation();
 	}
 	else if (tempToken.type == sub_op)
 	{
 		token = scanner->CallScanner(true);
 
-		Relation();
+		//Relation();
 
-		return;
+		return Relation();
 	}
-	/*else
-	{
-		std::cout << "Error, we were expecting an arithmetic operator.\n";
-	}
-	*/
+	return Symbol();
 }
 
-void Parser::Relation()
+Symbol Parser::Relation()
 {
 	Term();
 
 	SubRelation();
+
+	return Symbol();
 }
 
-void Parser::SubRelation()
+Symbol Parser::SubRelation()
 {
 	Token tempToken = scanner->CallScanner(false);
 
@@ -552,60 +597,61 @@ void Parser::SubRelation()
 	{
 		token = scanner->CallScanner(true);
 
-		Term();
+		//Term();
 
-		return;
+		return Term();
 	}
 	else if (tempToken.type == sym_lessEqual)
 	{
 		token = scanner->CallScanner(true);
 
-		Term();
+		
 
-		return;
+		return Term();
 	}
 	else if (tempToken.type == sym_great)
 	{
 		token = scanner->CallScanner(true);
 
-		Term();
+		
 
-		return;
+		return Term();
 	}
 	else if (tempToken.type == sym_greatEqual)
 	{
 		token = scanner->CallScanner(true);
 
-		Term();
+		
 
-		return;
+		return Term();
 	}
 	else if (tempToken.type == equal_op)
 	{
 		token = scanner->CallScanner(true);
 
-		Term();
+		//Term();
 
-		return;
+		return Term();
 	}
 	else if (tempToken.type == sym_notEqual)
 	{
 		token = scanner->CallScanner(true);
-
-		Term();
-
-		return;
+		
+		return Term();
 	}
+	return Symbol();
 }
 
-void Parser::Term()
+Symbol Parser::Term()
 {
 	Factor();
 
 	SubTerm();
+
+	return Symbol();
 }
 
-void Parser::SubTerm()
+Symbol Parser::SubTerm()
 {
 	Token tempToken = scanner->CallScanner(false);
 
@@ -613,28 +659,40 @@ void Parser::SubTerm()
 	{
 		token = scanner->CallScanner(true);
 
-		Factor();
+		Symbol factor = Factor();
 
-		SubTerm();
+		Symbol subTerm = SubTerm();
 		
-		return;
+		if (subTerm.getIdentifer() != "")
+		{
+
+		}
+		else
+		{
+			return factor;
+		}
+
+	}
+	else
+	{
+		return Symbol();
 	}
 }
 
-void Parser::Factor()
+Symbol Parser::Factor()
 {
 	Token tempToken = scanner->CallScanner(false);
 
 	if (tempToken.type == sym_lparen)
 	{
 		token = scanner->CallScanner(true);
-		Expression();
+		Symbol expr = Expression();
 
 		tempToken = scanner->CallScanner(false);
 		if (tempToken.type == sym_rparen)
 		{
 			token = scanner->CallScanner(true);
-			return;
+			return expr;
 		}
 		else
 		{
@@ -643,12 +701,16 @@ void Parser::Factor()
 	}
 	else if (tempToken.type == id)
 	{
-		//check if it is either a procedure call or a name, symbol table look up
 		token = scanner->CallScanner(true);
 
+		tempToken = scanner->CallScanner(false);
 
+		if (tempToken.type == sym_lparen)
+		{ 
+			return ProcedureCall();
+		}
 
-		return;
+		return SymTab.FindSymbol(token.val.stringVal);
 	}
 	else if (tempToken.type == sub_op)
 	{
@@ -660,38 +722,46 @@ void Parser::Factor()
 		if (tempToken.type == id)
 		{
 			token = scanner->CallScanner(true);
-			Name();
+			return Name();
 		}
 		else if (tempToken.type == literal_int || tempToken.type == literal_float)
 		{
 			token = scanner->CallScanner(true);
 
-			Number();
-
-			return;
+			return Number();
 		}
 	}
 	else if (tempToken.type == literal_int || tempToken.type == literal_float)
 	{
 		token = scanner->CallScanner(true);
 
-		Number();
-
-		return;
+		return Number();
 	}
 	else if (tempToken.type == literal_string)
 	{
 		token = scanner->CallScanner(true);
 
-		String();
-
-		return;
+		return String();
 	}
-	else if (tempToken.type == bool_true || tempToken.type == bool_false)
+	else if (tempToken.type == bool_true)
 	{
 		token = scanner->CallScanner(true);
 
-		return;
+		Symbol boolT;
+		boolT.setIdentifier(token.val.stringVal);
+		boolT.setType(token.type);
+
+		return boolT;
+	}
+	else if (tempToken.type == bool_false)
+	{
+		token = scanner->CallScanner(true);
+
+		Symbol boolF;
+		boolF.setIdentifier(token.val.stringVal);
+		boolF.setType(token.type);
+
+		return boolF;
 	}
 	else
 	{
@@ -700,12 +770,55 @@ void Parser::Factor()
 	
 }
 
-void Parser::Name()
+Symbol Parser::ProcedureCall() //at this point the id is scanned in
+{
+	bool isIn = SymTab.LookupSymbol(token.val.stringVal);
+	Symbol procedureCall;
+	if (isIn)
+	{
+		procedureCall = SymTab.FindSymbol(token.val.stringVal);
+		
+		//HELP
+
+		token = scanner->CallScanner(true); //already know it is a procedure call
+
+		Token tempToken = scanner->CallScanner(false);
+		if (tempToken.type != sym_rparen)
+		{
+			ArgumentList();
+		}
+		
+	}
+
+	return procedureCall;
+}
+
+void Parser::ArgumentList()
+{
+	Expression();
+
+	Token tempToken = scanner->CallScanner(false);
+	if (tempToken.type == sym_comma)
+	{
+		token = scanner->CallScanner(true);
+
+		ArgumentList();
+	}
+	else if (token.type == sym_rparen)
+	{
+		return;
+	}
+	else
+	{
+		std::cout << "Error, not a comma or a ).\n";
+	}
+}
+
+Symbol Parser::Name()
 {
 	if (token.type == id)
 	{
-
-		return;
+		return SymTab.FindSymbol(token.val.stringVal);
 	}
 	else
 	{
@@ -713,22 +826,38 @@ void Parser::Name()
 	}
 }
 
-void Parser::Number()
+Symbol Parser::Number()
 {
 
-	if (token.type == literal_int || token.type == literal_float)
+	if (token.type == literal_int)
 	{
-		
-		return;
+		Symbol nSym;
+		nSym.setIdentifier(std::to_string(token.val.intVal));
+		nSym.setIsArr(false);
+		nSym.setType(token.type);
+
+		return nSym;
+	}
+	else if (token.type == literal_float)
+	{
+		Symbol nSym;
+		nSym.setIdentifier(std::to_string(token.val.floatVal));
+		nSym.setIsArr(false);
+		nSym.setType(token.type);
+
+		return nSym;
 	}
 }
 
-void Parser::String()
+Symbol Parser::String()
 {
 	if (token.type == literal_string)
 	{
+		Symbol sSym;
+		sSym.setIdentifier(token.val.stringVal);
+		sSym.setType(token.type);
 
-		return;
+		return sSym;
 	}
 }
 

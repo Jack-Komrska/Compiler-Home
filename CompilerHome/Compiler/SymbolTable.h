@@ -14,9 +14,9 @@ private:
 public:
 	SymbolTable();
 	void AddScope(Scope scope); //add a scope to the symbol table
-	Scope GetScope(std::string str); //gets the scope
+	Scope GetScope(std::string str); //gets the scope of a symbol
 	void InsertSymbol(Symbol symbol); //insert a symbol
-	bool LookupSymbol(Symbol symbol); //check if a symbol exists
-	Symbol FindSymbol(Symbol symbol); //return a symbol
-
+	bool LookupSymbol(std::string str); //check if a symbol exists
+	Symbol FindSymbol(std::string str); //return a symbol
+	int getScopeLoc();
 };
