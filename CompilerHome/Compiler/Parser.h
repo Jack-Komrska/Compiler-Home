@@ -64,11 +64,13 @@ public:
 
 	Symbol SubArithOp();
 
-	Symbol Relation();
+	Symbol Relation(Symbol term = Symbol());
+
+	bool isRelation(definition relation);
 
 	Symbol SubRelation();
 
-	Symbol Term();
+	Symbol Term(Symbol factor = Symbol());
 
 	Symbol SubTerm();
 

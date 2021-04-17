@@ -67,7 +67,7 @@ public:
 		map["string"] = str;
 		map["true"] = bool_true;
 		map["false"] = bool_false;
-		map["=="] = equal_op; //not searching for symbols atm, may need to at some point
+		map["=="] = sym_doubEqual; //not searching for symbols atm, may need to at some point
 		map[":="] = sym_colEqual;
 		map["*"] = mult_op;
 		map["+"] = add_op;
@@ -204,7 +204,7 @@ public:
 				numGet++;
 				if (nextCh == '=')
 				{
-					token->type = definition::equal_op;
+					token->type = definition::sym_doubEqual;
 					token->val.stringVal[0] = currCh;
 					token->val.stringVal[1] = nextCh;
 				}
@@ -489,6 +489,7 @@ public:
 		{
 			{
 				nextCh = file.get();
+				numGet++;
 				if (nextCh == '/') //finds the end of the line
 				{
 					token->type = comment;
@@ -565,9 +566,10 @@ public:
 			else if (currCh == '=')
 			{
 				nextCh = file.get();
+				numGet++;
 				if (nextCh == '=')
 				{
-					token->type = definition::equal_op;
+					token->type = definition::sym_doubEqual;
 					token->val.stringVal[0] = currCh;
 					token->val.stringVal[1] = nextCh;
 				}
@@ -626,6 +628,7 @@ public:
 			else if (currCh == '<')
 			{
 				nextCh = file.get();
+				numGet++;
 				if (nextCh == '=')
 				{
 					token->type = definition::sym_lessEqual;
@@ -641,6 +644,7 @@ public:
 			else if (currCh == '>')
 			{
 				nextCh = file.get();
+				numGet++;
 				if (nextCh == '=')
 				{
 					token->type = definition::sym_greatEqual;

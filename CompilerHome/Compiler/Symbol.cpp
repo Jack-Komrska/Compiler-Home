@@ -1,4 +1,5 @@
 #include "Symbol.h"
+#include <iostream>
 #pragma once
 
 Symbol::Symbol()
@@ -9,6 +10,7 @@ Symbol::Symbol()
 	isProc = false;
 	isGlob = false;
 	isArr = false;
+	
 }
 
 std::string Symbol::getIdentifer()
@@ -41,6 +43,11 @@ bool Symbol::getArray()
 	return isArr;
 }
 
+std::vector<Symbol> Symbol::getChildren()
+{
+	return children;
+}
+
 void Symbol::setIdentifier(std::string str)
 {
 	identifier = str;
@@ -69,4 +76,19 @@ void Symbol::setIsGlobal(bool global)
 void Symbol::setIsArr(bool arr)
 {
 	isArr = arr;
+}
+
+void Symbol::addChild(Symbol child)
+{
+	children.push_back(child);
+}
+
+void Symbol::printTree()
+{
+	std::cout << identifier + ": ";
+	for (auto child : children)
+	{
+		std::cout << child.getIdentifer() << ", ";
+	}
+	std::cout << std::endl;
 }

@@ -1,11 +1,16 @@
-﻿  Parser.cpp
+﻿  Main.cpp
 C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Scanner.h(338,22): warning C4018: '<': signed/unsigned mismatch
 C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Scanner.h(369,22): warning C4018: '<': signed/unsigned mismatch
-C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Scanner.h(689,22): warning C4018: '<': signed/unsigned mismatch
-C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Scanner.h(719,22): warning C4018: '<': signed/unsigned mismatch
-C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Parser.cpp(680): warning C4715: 'Parser::SubTerm': not all control paths return a value
-C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Parser.cpp(777): warning C4715: 'Parser::Name': not all control paths return a value
-C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Parser.cpp(800): warning C4715: 'Parser::Number': not all control paths return a value
-C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Parser.cpp(812): warning C4715: 'Parser::String': not all control paths return a value
-C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Parser.cpp(765): warning C4715: 'Parser::Factor': not all control paths return a value
+C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Scanner.h(693,22): warning C4018: '<': signed/unsigned mismatch
+C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Scanner.h(723,22): warning C4018: '<': signed/unsigned mismatch
+  Parser.cpp
+C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Scanner.h(338,22): warning C4018: '<': signed/unsigned mismatch
+C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Scanner.h(369,22): warning C4018: '<': signed/unsigned mismatch
+C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Scanner.h(693,22): warning C4018: '<': signed/unsigned mismatch
+C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Scanner.h(723,22): warning C4018: '<': signed/unsigned mismatch
+  Generating Code...
+C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Parser.cpp(894): warning C4715: 'Parser::Name': not all control paths return a value
+C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Parser.cpp(917): warning C4715: 'Parser::Number': not all control paths return a value
+C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Parser.cpp(838): warning C4715: 'Parser::Factor': not all control paths return a value
+C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Parser.cpp(929): warning C4715: 'Parser::String': not all control paths return a value
   Compiler.vcxproj -> C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Debug\Compiler.exe

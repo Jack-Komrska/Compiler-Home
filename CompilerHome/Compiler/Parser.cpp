@@ -485,6 +485,7 @@ void Parser::AssignmentStatement()
 	{
 		//error :=
 	}
+
 	Symbol exp = Expression();
 	
 	//type check here
@@ -580,104 +581,97 @@ Symbol Parser::SubArithOp()
 	return Symbol();
 }
 
-Symbol Parser::Relation()
+Symbol Parser::Relation(Symbol term)
 {
-	Term();
+	if (term.getIdentifer() == "")
+	{
+		term = Term();
+	}
 
-	SubRelation();
+	Symbol relation = Symbol();
 
-	return Symbol();
-}
-
-Symbol Parser::SubRelation()
-{
 	Token tempToken = scanner->CallScanner(false);
 
-	if (tempToken.type == sym_less)
+	if (isRelation(tempToken.type))
 	{
-		token = scanner->CallScanner(true);
+		relation.setIdentifier(tempToken.val.stringVal);
+		relation.setType(tempToken.type);
 
-		//Term();
+		relation.addChild(term);
+		token = scanner->CallScanner(true); //scanning the relation in
 
-		return Term();
+		relation.addChild(Term());
+
+		relation.printTree();
+
+		Token relationOp = scanner->CallScanner(false);
+
+		if (isRelation(relationOp.type))
+		{
+			return Relation(relation);
+		}
+		else
+		{
+			return relation;
+		}
 	}
-	else if (tempToken.type == sym_lessEqual)
+	else
 	{
-		token = scanner->CallScanner(true);
-
-		
-
-		return Term();
+		return term;
 	}
-	else if (tempToken.type == sym_great)
-	{
-		token = scanner->CallScanner(true);
 
-		
 
-		return Term();
-	}
-	else if (tempToken.type == sym_greatEqual)
-	{
-		token = scanner->CallScanner(true);
-
-		
-
-		return Term();
-	}
-	else if (tempToken.type == equal_op)
-	{
-		token = scanner->CallScanner(true);
-
-		//Term();
-
-		return Term();
-	}
-	else if (tempToken.type == sym_notEqual)
-	{
-		token = scanner->CallScanner(true);
-		
-		return Term();
-	}
-	return Symbol();
 }
 
-Symbol Parser::Term()
+bool Parser::isRelation(definition type)
 {
-	Factor();
-
-	SubTerm();
-
-	return Symbol();
+	if (type >= sym_less && type <= sym_doubEqual)
+	{
+		return true;
+	}
+	return false;
 }
 
-Symbol Parser::SubTerm()
+Symbol Parser::Term(Symbol factor)
 {
+	if (factor.getIdentifer() == "")
+	{
+		factor = Factor();
+	}
+
+	Symbol product = Symbol();
+
 	Token tempToken = scanner->CallScanner(false);
 
 	if (tempToken.type == mult_op || tempToken.type == div_op)
 	{
-		token = scanner->CallScanner(true);
+		product.setIdentifier(tempToken.val.stringVal);
+		product.setType(tempToken.type);
 
-		Symbol factor = Factor();
+		product.addChild(factor);
+		token = scanner->CallScanner(true); //scanning the operator in
+		Symbol rhs = Factor();
+		product.addChild(rhs);
 
-		Symbol subTerm = SubTerm();
-		
-		if (subTerm.getIdentifer() != "")
+		Token termOp = scanner->CallScanner(false);
+
+		product.printTree(); //debug
+
+		if (termOp.type == mult_op || termOp.type == div_op)
 		{
-
+			return Term(product);
 		}
 		else
 		{
-			return factor;
+			return product;
 		}
-
 	}
-	else
+	else 
 	{
-		return Symbol();
+		return factor;
 	}
 }
+
 
 Symbol Parser::Factor()
 {
@@ -733,6 +727,7 @@ Symbol Parser::Factor()
 	}
 	else if (tempToken.type == literal_int || tempToken.type == literal_float)
 	{
+		
 		token = scanner->CallScanner(true);
 
 		return Number();
