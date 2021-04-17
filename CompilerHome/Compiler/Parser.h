@@ -64,17 +64,17 @@ public:
 
 	Symbol SubArithOp();
 
-	Symbol Relation(Symbol term = Symbol());
+	Symbol Relation(definition &relationType, Symbol term = Symbol());
 
 	bool isRelation(definition relation);
 
 	Symbol SubRelation();
 
-	Symbol Term(Symbol factor = Symbol());
+	Symbol Term(definition &termType, Symbol factor = Symbol());
 
 	Symbol SubTerm();
 
-	Symbol Factor();
+	Symbol Factor(definition &termType);
 
 	Symbol Name();
 
@@ -83,5 +83,7 @@ public:
 	Symbol Number(); //returns an int or double
 
 	Symbol String(); //yet again, returns a String most likely and not a number
+
+	bool ValidTypes(definition& returnDef, int lhs, int rhs);
 
 };

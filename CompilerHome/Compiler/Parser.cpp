@@ -551,7 +551,8 @@ Symbol Parser::SubExpression()
 
 Symbol Parser::ArithOp()
 {
-	Relation();
+	definition lhsType;
+	Relation(lhsType);
 
 	SubArithOp();
 
@@ -561,14 +562,14 @@ Symbol Parser::ArithOp()
 Symbol Parser::SubArithOp()
 {
 	Token tempToken = scanner->CallScanner(false);
-
+	definition lhsType;
 	if (tempToken.type == add_op)
 	{
 		token = scanner->CallScanner(true);
 
 		//Relation();
 
-		return Relation();
+		return Relation(lhsType);
 	}
 	else if (tempToken.type == sub_op)
 	{
@@ -576,16 +577,21 @@ Symbol Parser::SubArithOp()
 
 		//Relation();
 
-		return Relation();
+		return Relation(lhsType);
 	}
 	return Symbol();
 }
 
-Symbol Parser::Relation(Symbol term)
+Symbol Parser::Relation(definition &relationType, Symbol term)
 {
+	definition lhsType;
 	if (term.getIdentifer() == "")
 	{
-		term = Term();
+		term = Term(lhsType);
+	}
+	else
+	{
+		lhsType = definition(term.getType());
 	}
 
 	Symbol relation = Symbol();
@@ -599,8 +605,14 @@ Symbol Parser::Relation(Symbol term)
 
 		relation.addChild(term);
 		token = scanner->CallScanner(true); //scanning the relation in
+		definition rhsType;
 
-		relation.addChild(Term());
+		relation.addChild(Term(rhsType));
+
+		if (!ValidTypes(relationType, lhsType, rhsType))
+		{
+			std::cout << "Error, invalid types.\n";
+		}
 
 		relation.printTree();
 
@@ -608,7 +620,7 @@ Symbol Parser::Relation(Symbol term)
 
 		if (isRelation(relationOp.type))
 		{
-			return Relation(relation);
+			return Relation(relationType, relation);
 		}
 		else
 		{
@@ -617,10 +629,9 @@ Symbol Parser::Relation(Symbol term)
 	}
 	else
 	{
+		relationType = definition(term.getType());
 		return term;
 	}
-
-
 }
 
 bool Parser::isRelation(definition type)
@@ -632,11 +643,16 @@ bool Parser::isRelation(definition type)
 	return false;
 }
 
-Symbol Parser::Term(Symbol factor)
+Symbol Parser::Term(definition &termType, Symbol factor)
 {
+	definition lhsType;
 	if (factor.getIdentifer() == "")
 	{
-		factor = Factor();
+		factor = Factor(lhsType);
+	}
+	else
+	{
+		lhsType = definition(factor.getType());
 	}
 
 	Symbol product = Symbol();
@@ -650,8 +666,14 @@ Symbol Parser::Term(Symbol factor)
 
 		product.addChild(factor);
 		token = scanner->CallScanner(true); //scanning the operator in
-		Symbol rhs = Factor();
+		definition rhsType;
+		Symbol rhs = Factor(rhsType);
 		product.addChild(rhs);
+
+		if (!ValidTypes(termType, lhsType, rhsType))
+		{
+			std::cout << "Error, invalid types.\n";
+		}
 
 		Token termOp = scanner->CallScanner(false);
 
@@ -659,21 +681,53 @@ Symbol Parser::Term(Symbol factor)
 
 		if (termOp.type == mult_op || termOp.type == div_op)
 		{
-			return Term(product);
+			return Term(termType, product);
 		}
 		else
 		{
+			
 			return product;
 		}
 	}
 	else 
 	{
+		termType = definition(factor.getType());
 		return factor;
 	}
 }
 
+bool Parser::ValidTypes(definition& returnDef, int lhs, int rhs)
+{
+	if (lhs == rhs) 
+	{
+		returnDef = definition(lhs);
+		return true;
+	}
+	else if ((lhs == literal_int && (rhs == bool_true || rhs == bool_false || isRelation(definition(rhs)))) || (rhs == literal_int && (lhs == bool_true || lhs == bool_false || isRelation(definition(rhs)))))
+	{
+		returnDef = literal_int;
+		return true;
+	}
+	else if ((lhs == literal_int && rhs == literal_float) || (lhs == literal_float && rhs == literal_int))
+	{
+		returnDef = literal_float;
+		return true;
+	}
+	else if ((lhs == bool_true && (rhs == bool_false || isRelation(definition(rhs))) || (lhs == bool_false && (rhs == bool_true || isRelation(definition(rhs))))))
+	{
+		returnDef = literal_int;
+		return true;
+	}
+	else if (isRelation(definition(lhs)) && (rhs == bool_true || rhs == bool_false || isRelation(definition(rhs))))
+	{
+		returnDef = literal_int;
+		return true;
+	}
 
-Symbol Parser::Factor()
+	return false;
+}
+
+Symbol Parser::Factor(definition &factorType)
 {
 	Token tempToken = scanner->CallScanner(false);
 
@@ -721,27 +775,26 @@ Symbol Parser::Factor()
 		else if (tempToken.type == literal_int || tempToken.type == literal_float)
 		{
 			token = scanner->CallScanner(true);
-
+			factorType = token.type;
 			return Number();
 		}
 	}
 	else if (tempToken.type == literal_int || tempToken.type == literal_float)
 	{
-		
 		token = scanner->CallScanner(true);
-
+		factorType = token.type;
 		return Number();
 	}
 	else if (tempToken.type == literal_string)
 	{
 		token = scanner->CallScanner(true);
-
+		factorType = token.type;
 		return String();
 	}
 	else if (tempToken.type == bool_true)
 	{
 		token = scanner->CallScanner(true);
-
+		factorType = token.type;
 		Symbol boolT;
 		boolT.setIdentifier(token.val.stringVal);
 		boolT.setType(token.type);
@@ -751,7 +804,7 @@ Symbol Parser::Factor()
 	else if (tempToken.type == bool_false)
 	{
 		token = scanner->CallScanner(true);
-
+		factorType = token.type;
 		Symbol boolF;
 		boolF.setIdentifier(token.val.stringVal);
 		boolF.setType(token.type);

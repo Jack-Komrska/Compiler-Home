@@ -634,9 +634,12 @@ public:
 					token->type = definition::sym_lessEqual;
 					token->val.stringVal[0] = currCh;
 					token->val.stringVal[1] = nextCh;
+					numGet--;
 				}
 				else
 				{
+					file.unget();
+					numGet--;
 					token->type = definition::sym_less;
 					token->val.stringVal[0] = currCh;
 				}
@@ -650,9 +653,12 @@ public:
 					token->type = definition::sym_greatEqual;
 					token->val.stringVal[0] = currCh;
 					token->val.stringVal[1] = nextCh;
+					numGet--;
 				}
 				else
 				{
+					file.unget();
+					numGet--;
 					token->type = definition::sym_great;
 					token->val.stringVal[0] = currCh;
 				}
@@ -670,6 +676,7 @@ public:
 			token->type = literal_string;
 			int j = 0;
 			currCh = file.get();
+			
 			while (currCh != '"')
 			{
 				token->val.stringVal[j] = currCh;
