@@ -21,6 +21,7 @@ void Parser::Program()
 	local.name = "local";
 	local.scopeLoc = SymTab.getScopeLoc();
 	SymTab.AddScope(local); //adding the global scope at the very beginning
+	tempScope.name = "local";
 
 	ProgramHeader();
 
@@ -81,7 +82,7 @@ void Parser::ProgramHeader() // add elses for errors
 
 void Parser::ProgramBody() //contains declarations and statements
 {
-	Declaration(); //need some form of a while to keep on reading in declarations
+	Declaration();
 
 	
 	Token tempToken = scanner->CallScanner(false);
@@ -281,7 +282,7 @@ void Parser::Parameter()
 
 void Parser::ProcedureBody()
 {
-	Declaration(); //need some form of a while to keep on reading in declarations
+	Declaration();
 
 	Token tempToken = scanner->CallScanner(false);
 
@@ -289,7 +290,13 @@ void Parser::ProcedureBody()
 	{
 		token = scanner->CallScanner(true);
 
-		Statement(); //need some form of a while to keep on reading in statements
+		Token tempToken = scanner->CallScanner(false);
+		while (tempToken.type != key_end)
+		{
+			Statement(); //need some form of a while to keep on reading in statements
+
+			tempToken = scanner->CallScanner(false);
+		}
 	}
 
 	tempToken = scanner->CallScanner(false);
@@ -330,10 +337,6 @@ void Parser::VariableDeclaration()
 		if (tempScope.name == "global")
 		{
 			id.setIsGlobal(true);
-		}
-		else
-		{
-			id.setIsGlobal(false);
 		}
 		
 		id.setScopeName(tempScope.name);
@@ -395,7 +398,7 @@ void Parser::VariableDeclaration()
 						std::cout << "Error, we were expecting an integer.\n";
 					}
 				}
-				else if (tempToken.type == sym_sc || tempToken.type == sym_rparen) //end the declaration, semi colon
+				else if (tempToken.type == sym_sc || tempToken.type == sym_rparen || tempToken.type == sym_comma)
 				{
 					token = scanner->CallScanner(true);
 					id.setIsArr(false);
