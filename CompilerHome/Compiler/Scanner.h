@@ -29,7 +29,6 @@ public:
 		addMaps();
 	};
 
-
 	void openFile()
 	{
 		file.open(fileName);

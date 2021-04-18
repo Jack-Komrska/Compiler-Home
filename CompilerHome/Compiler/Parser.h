@@ -56,23 +56,15 @@ public:
 
 	void Bound();
 
-	Symbol Expression();
+	Symbol Expression(definition &expressionType, Symbol arith = Symbol());
 
-	Symbol SubExpression();
-
-	Symbol ArithOp();
-
-	Symbol SubArithOp();
+	Symbol ArithOp(definition &arithType, Symbol relation = Symbol());
 
 	Symbol Relation(definition &relationType, Symbol term = Symbol());
 
 	bool isRelation(definition relation);
 
-	Symbol SubRelation();
-
 	Symbol Term(definition &termType, Symbol factor = Symbol());
-
-	Symbol SubTerm();
 
 	Symbol Factor(definition &termType);
 
@@ -84,6 +76,7 @@ public:
 
 	Symbol String(); //yet again, returns a String most likely and not a number
 
-	bool ValidTypes(definition& returnDef, int lhs, int rhs);
+	bool ValidTypesExpression(definition& returnDef, int lhs, int rhs);
 
+	bool ValidTypesAssignment(definition& returnDef, int lhs, int rhs);
 };

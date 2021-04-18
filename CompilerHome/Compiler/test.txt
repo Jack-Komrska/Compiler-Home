@@ -1,5 +1,9 @@
 program jackProgram is
 	global variable x : integer;
+	global variable y : integer;
+	global variable z : integer;
 begin
-	x := 7 * 8 < 8 / "benis" >= true;
+	x := 8 * 7;
+	y := 4 + 9;
+	z:= x + y;
 end program.

@@ -330,7 +330,7 @@ void Parser::VariableDeclaration()
 			id.setIsGlobal(false);
 		}
 		id.setIsProcedure(false);
-		id.setType(0);
+		//id.setType(0);
 		id.setScopeName(tempScope.name);
 
 		tempToken = scanner->CallScanner(false);
@@ -345,7 +345,8 @@ void Parser::VariableDeclaration()
 			if (TypeMark(tempToken.type))
 			{
 				token = scanner->CallScanner(true);
-
+				id.setType(token.type);
+				
 				tempToken = scanner->CallScanner(false);
 
 				if (tempToken.type == sym_lbrack)
@@ -486,9 +487,44 @@ void Parser::AssignmentStatement()
 		//error :=
 	}
 
-	Symbol exp = Expression();
+	definition expressionType;
+	Symbol exp = Expression(expressionType);
 	
 	//type check here
+	definition typeReturn;
+	if (!ValidTypesAssignment(typeReturn, dest.getType(), exp.getType()))
+	{
+		std::cout << "Invalid types at assignment\n.";
+	}
+	else
+	{
+		std::cout << dest.getType() << " and " << exp.getType() << ", are valid types.\n";
+	}
+}
+
+bool Parser::ValidTypesAssignment(definition &returnDef, int lhs, int rhs)
+{
+	if (lhs == num_integer && (rhs == literal_int || rhs == literal_float || rhs == bool_true || rhs == bool_false))
+	{
+		returnDef = num_integer;
+		return true;
+	}
+	else if (lhs == str && rhs == literal_string)
+	{
+		returnDef = str;
+		return true;
+	}
+	else if (lhs == boolean && (rhs == bool_true || rhs == bool_false || rhs == literal_int))
+	{
+		returnDef = boolean;
+		return true;
+	}
+	else if (lhs == num_float && (rhs == literal_int || rhs == literal_float))
+	{
+		returnDef = num_float;
+		return true;
+	}
+	return false;
 }
 
 Symbol Parser::Destination()
@@ -504,82 +540,109 @@ Symbol Parser::Destination()
 	}
 }
 
-Symbol Parser::Expression()
-{
-	//std::cout << "Expression\n";
-	Symbol expr;
-
-	ArithOp();
-
-	SubExpression();
-
-	return expr;
-}
-
-Symbol Parser::SubExpression()
-{
-	//std::cout << "SubExpression\n";
-	Token tempToken = scanner->CallScanner(false);
-	
-	if (tempToken.type == key_and)
-	{
-		token = scanner->CallScanner(true);
-
-		//ArithOp();
-
-		return ArithOp();
-	}
-	else if (tempToken.type == key_or)
-	{
-		token = scanner->CallScanner(true);
-
-		//ArithOp();
-
-		return ArithOp();
-	}
-	else if (tempToken.type == key_not)
-	{
-		token = scanner->CallScanner(true);
-
-		//ArithOp();
-
-		return ArithOp();;
-	}
-
-	return Symbol();
-}
-
-Symbol Parser::ArithOp()
+Symbol Parser::Expression(definition& expressionType, Symbol arith)
 {
 	definition lhsType;
-	Relation(lhsType);
+	if (arith.getIdentifer() == "")
+	{
+		arith = ArithOp(lhsType);
+	}
+	else
+	{
+		lhsType = definition(arith.getType());
+	}
 
-	SubArithOp();
+	Symbol expr = Symbol();
 
-	return Symbol();
+	Token tempToken = scanner->CallScanner(false);
+
+	if (tempToken.type == key_and || tempToken.type == key_or || tempToken.type == key_not)
+	{
+		expr.setIdentifier(tempToken.val.stringVal);
+		expr.setType(tempToken.type);
+
+		expr.addChild(arith);
+		token = scanner->CallScanner(true);
+		definition rhsType;
+
+		arith.addChild(ArithOp(rhsType));
+
+		if (!ValidTypesExpression(expressionType, lhsType, rhsType))
+		{
+			std::cout << "Error, invalid types.\n";
+		}
+
+		expr.printTree();
+
+		Token exprOp = scanner->CallScanner(false);
+
+		if (tempToken.type == key_and || tempToken.type == key_or || tempToken.type == key_not)
+		{
+			return Expression(expressionType, expr);
+		}
+		else
+		{
+			return expr;
+		}
+	}
+	else
+	{
+		expressionType = definition(arith.getType());
+		return arith;
+	}
 }
 
-Symbol Parser::SubArithOp()
+Symbol Parser::ArithOp(definition &arithType, Symbol relation)
 {
-	Token tempToken = scanner->CallScanner(false);
 	definition lhsType;
-	if (tempToken.type == add_op)
+	if (relation.getIdentifer() == "")
 	{
-		token = scanner->CallScanner(true);
-
-		//Relation();
-
-		return Relation(lhsType);
+		relation = Relation(lhsType);
 	}
-	else if (tempToken.type == sub_op)
+	else
 	{
-		token = scanner->CallScanner(true);
-
-		//Relation();
-
-		return Relation(lhsType);
+		lhsType = definition(relation.getType());
 	}
-	return Symbol();
+
+	Symbol arith = Symbol();
+
+	Token tempToken = scanner->CallScanner(false);
+
+	if (tempToken.type == add_op || tempToken.type == sub_op)
+	{
+		arith.setIdentifier(tempToken.val.stringVal);
+		arith.setType(tempToken.type);
+
+		arith.addChild(relation);
+		token = scanner->CallScanner(true);
+		definition rhsType;
+
+		arith.addChild(Relation(rhsType));
+
+		if (!ValidTypesExpression(arithType, lhsType, rhsType))
+		{
+			std::cout << "Error, invalid types.\n";
+		}
+
+		arith.printTree();
+
+		Token arithOp = scanner->CallScanner(false);
+
+		if (arithOp.type == add_op || arithOp.type == sub_op)
+		{
+			return ArithOp(arithType, arith);
+		}
+		else
+		{
+			return arith;
+		}
+	}
+	else
+	{
+		arithType = definition(relation.getType());
+		return relation;
+	}
+
 }
 
 Symbol Parser::Relation(definition &relationType, Symbol term)
@@ -609,7 +672,7 @@ Symbol Parser::Relation(definition &relationType, Symbol term)
 
 		relation.addChild(Term(rhsType));
 
-		if (!ValidTypes(relationType, lhsType, rhsType))
+		if (!ValidTypesExpression(relationType, lhsType, rhsType))
 		{
 			std::cout << "Error, invalid types.\n";
 		}
@@ -670,7 +733,7 @@ Symbol Parser::Term(definition &termType, Symbol factor)
 		Symbol rhs = Factor(rhsType);
 		product.addChild(rhs);
 
-		if (!ValidTypes(termType, lhsType, rhsType))
+		if (!ValidTypesExpression(termType, lhsType, rhsType))
 		{
 			std::cout << "Error, invalid types.\n";
 		}
@@ -696,7 +759,7 @@ Symbol Parser::Term(definition &termType, Symbol factor)
 	}
 }
 
-bool Parser::ValidTypes(definition& returnDef, int lhs, int rhs)
+bool Parser::ValidTypesExpression(definition& returnDef, int lhs, int rhs)
 {
 	if (lhs == rhs) 
 	{
@@ -734,7 +797,8 @@ Symbol Parser::Factor(definition &factorType)
 	if (tempToken.type == sym_lparen)
 	{
 		token = scanner->CallScanner(true);
-		Symbol expr = Expression();
+		definition expressionType;
+		Symbol expr = Expression(expressionType);
 
 		tempToken = scanner->CallScanner(false);
 		if (tempToken.type == sym_rparen)
@@ -843,7 +907,8 @@ Symbol Parser::ProcedureCall() //at this point the id is scanned in
 
 void Parser::ArgumentList()
 {
-	Expression();
+	definition expressionType;
+	Expression(expressionType);
 
 	Token tempToken = scanner->CallScanner(false);
 	if (tempToken.type == sym_comma)
@@ -917,7 +982,8 @@ void Parser::IfStatement()
 	{
 		token = scanner->CallScanner(true);
 
-		Expression();
+		definition expressionType;
+		Expression(expressionType);
 
 		tempToken = scanner->CallScanner(false);
 
@@ -1019,7 +1085,8 @@ void Parser::LoopStatement()
 		{
 			token = scanner->CallScanner(true);
 
-			Expression();
+			definition expressionType;
+			Expression(expressionType);
 
 			tempToken = scanner->CallScanner(false);
 
@@ -1068,5 +1135,6 @@ void Parser::LoopStatement()
 
 void Parser::ReturnStatement()
 {
-	Expression();
+	definition expressionType;
+	Expression(expressionType);
 }
