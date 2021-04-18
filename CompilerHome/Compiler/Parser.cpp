@@ -191,6 +191,11 @@ void Parser::ProcedureHeader()
 	{
 		token = scanner->CallScanner(true);
 
+		Symbol procedure;
+		procedure.setIdentifier(token.val.stringVal);
+		procedure.setIsProcedure(true);
+		tempScope.name = token.val.stringVal;
+
 		tempToken = scanner->CallScanner(false);
 
 		if (tempToken.type == sym_colon)
@@ -202,6 +207,7 @@ void Parser::ProcedureHeader()
 			if (TypeMark(tempToken.type))
 			{
 				token = scanner->CallScanner(true);
+				procedure.setType(token.type);
 
 				tempToken = scanner->CallScanner(false);
 
@@ -329,8 +335,7 @@ void Parser::VariableDeclaration()
 		{
 			id.setIsGlobal(false);
 		}
-		id.setIsProcedure(false);
-		//id.setType(0);
+		
 		id.setScopeName(tempScope.name);
 
 		tempToken = scanner->CallScanner(false);
@@ -390,7 +395,7 @@ void Parser::VariableDeclaration()
 						std::cout << "Error, we were expecting an integer.\n";
 					}
 				}
-				else if (tempToken.type == sym_sc) //end the declaration, semi colon
+				else if (tempToken.type == sym_sc || tempToken.type == sym_rparen) //end the declaration, semi colon
 				{
 					token = scanner->CallScanner(true);
 					id.setIsArr(false);
@@ -996,47 +1001,20 @@ void Parser::IfStatement()
 			{
 				token = scanner->CallScanner(true);
 
-				Statement();
-
-				tempToken = scanner->CallScanner(false);
-
-				if (tempToken.type == sym_sc) //will need to account for multiple statements and to account for potential else statements
+				Token tempToken = scanner->CallScanner(false);
+				while (tempToken.type != key_end && tempToken.type != key_else)
 				{
-					token = scanner->CallScanner(true);
-
-					tempToken = scanner->CallScanner(false);
-
-					if (tempToken.type == key_end)
-					{
-						token = scanner->CallScanner(true);
-
-						tempToken = scanner->CallScanner(false);
-
-						if (tempToken.type == key_if)
-						{
-							token = scanner->CallScanner(true);
-
-							return;
-						}
-						else
-						{
-							//error looking for if
-						}
-					}
-					else
-					{
-						//error end
-					}
-				}
-				else if (tempToken.type == key_else) //while loop for multiple elses? i think
-				{
-					token = scanner->CallScanner(true);
-
 					Statement();
 
 					tempToken = scanner->CallScanner(false);
+				}
 
-					if (tempToken.type == sym_sc)
+				if (tempToken.type == key_end) //will need to account for multiple statements and to account for potential else statements
+				{
+					token = scanner->CallScanner(true);
+
+					tempToken = scanner->CallScanner(false);
+					if (tempToken.type == key_if)
 					{
 						token = scanner->CallScanner(true);
 
@@ -1044,7 +1022,33 @@ void Parser::IfStatement()
 					}
 					else
 					{
-						//error sc
+						//error looking for if
+					}
+				}
+				else if (tempToken.type == key_else)
+				{
+					token = scanner->CallScanner(true);
+
+					Token tempToken = scanner->CallScanner(false);
+					while (tempToken.type != key_end)
+					{
+						Statement(); 
+
+						tempToken = scanner->CallScanner(false);
+					}
+					
+					token = scanner->CallScanner(true);
+
+					tempToken = scanner->CallScanner(false);
+					if (tempToken.type == key_if)
+					{
+						token = scanner->CallScanner(true);
+
+						return;
+					}
+					else
+					{
+						//error looking for if
 					}
 				}
 				else
@@ -1079,56 +1083,51 @@ void Parser::LoopStatement()
 
 		AssignmentStatement();
 
+		definition expressionType;
+		Expression(expressionType);
+
 		tempToken = scanner->CallScanner(false);
 
-		if (tempToken.type == sym_sc)
+		if (tempToken.type == sym_rparen)
 		{
 			token = scanner->CallScanner(true);
 
-			definition expressionType;
-			Expression(expressionType);
+			//while loop for statements
+			Token tempToken = scanner->CallScanner(false);
+			while (tempToken.type != key_end)
+			{
+				Statement(); //need some form of a while to keep on reading in statements
+
+				tempToken = scanner->CallScanner(false);
+			}
 
 			tempToken = scanner->CallScanner(false);
 
-			if (tempToken.type == sym_rparen)
+			if (tempToken.type == key_end)
 			{
 				token = scanner->CallScanner(true);
-
-				//while loop for statements
-				Statement();
-
+					
 				tempToken = scanner->CallScanner(false);
 
-				if (tempToken.type == key_end)
+				if (tempToken.type == key_for)
 				{
 					token = scanner->CallScanner(true);
-					
-					tempToken = scanner->CallScanner(false);
 
-					if (tempToken.type == key_for)
-					{
-						token = scanner->CallScanner(true);
-
-						return;
-					}
-					else
-					{
-						//error for
-					}
+					return;
 				}
 				else
 				{
-					//error end
+					//error for
 				}
 			}
 			else
 			{
-				//error )
+				//error end
 			}
 		}
 		else
 		{
-			//error sc
+			//error )
 		}
 	}
 }

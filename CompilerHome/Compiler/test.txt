@@ -3,7 +3,7 @@ program jackProgram is
 	global variable y : integer;
 	global variable z : integer;
 begin
-	x := 8 * 7;
-	y := 4 + 9;
+	x := 8;
+	y := 4;
 	z:= x + y;
 end program.
