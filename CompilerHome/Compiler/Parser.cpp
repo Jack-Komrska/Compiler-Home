@@ -83,7 +83,6 @@ void Parser::ProgramHeader() // add elses for errors
 void Parser::ProgramBody() //contains declarations and statements
 {
 	Declaration();
-
 	
 	Token tempToken = scanner->CallScanner(false);
 	while (tempToken.type != key_end) 
@@ -502,7 +501,7 @@ void Parser::AssignmentStatement()
 	definition typeReturn;
 	if (!ValidTypesAssignment(typeReturn, dest.getType(), exp.getType()))
 	{
-		std::cout << "Invalid types at assignment\n.";
+		std::cout << "Invalid types at assignment.\n";
 	}
 	else
 	{

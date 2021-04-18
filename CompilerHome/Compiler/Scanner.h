@@ -107,6 +107,7 @@ public:
 		}
 	}
 
+	/*
 	Token PeekToken()
 	{
 		Token* token = new Token();
@@ -449,39 +450,37 @@ public:
 
 		return *token;
 	}
+	*/
 
 	Token CallScanner(bool isScan) //if true scan, if false peek
 	{ //middle man for ignoring comments
 		Token temp;
 		
 		do {
-			if (isScan)
-			{
-				temp = ScanToken();
-			}
-			else
-			{
-				temp = PeekToken();
-			}
+			temp = ScanToken(isScan);
 			
 		} while (temp.type == comment); //only reruns the loop if the type is a comment
 		
 		return temp;
 	}
 
-	Token ScanToken()
+	Token ScanToken(bool peek) // I know all of the bools for peek should techinically be flipped but I do not want to mess everything up
 	{
 		Token* token = new Token();
 
 		currCh = file.get(); //get each character individually
+		if (!peek) { numGet++; }
 
-		if (currCh == '\n')
+		if (currCh == '\n' && peek)
 		{
 			lineNum += 1;
 		}
 
 		while (isspace(currCh))
+		{
 			currCh = file.get();
+			if (!peek) { numGet++; }
+		}
 
 		switch (currCh) {
 		case '/':
@@ -565,26 +564,30 @@ public:
 			else if (currCh == '=')
 			{
 				nextCh = file.get();
-				numGet++;
+				if (!peek) { numGet++; }
 				if (nextCh == '=')
 				{
 					token->type = definition::sym_doubEqual;
 					token->val.stringVal[0] = currCh;
 					token->val.stringVal[1] = nextCh;
+					if (peek) { numGet--; }
 				}
 			}
 			else if (currCh == ':')
 			{
 				nextCh = file.get();
+				if (!peek) { numGet++; }
 				if (nextCh == '=')
 				{
 					token->type = definition::sym_colEqual;
 					token->val.stringVal[0] = currCh;
 					token->val.stringVal[1] = nextCh;
+					if (peek) { numGet--; }
 				}
 				else
 				{
 					file.unget();
+					numGet--;
 					token->type = definition::sym_colon;
 					token->val.stringVal[0] = currCh;
 				}
@@ -627,13 +630,13 @@ public:
 			else if (currCh == '<')
 			{
 				nextCh = file.get();
-				numGet++;
+				if (!peek) { numGet++; }
 				if (nextCh == '=')
 				{
 					token->type = definition::sym_lessEqual;
 					token->val.stringVal[0] = currCh;
 					token->val.stringVal[1] = nextCh;
-					numGet--;
+					if (peek) { numGet--; }
 				}
 				else
 				{
@@ -646,13 +649,13 @@ public:
 			else if (currCh == '>')
 			{
 				nextCh = file.get();
-				numGet++;
+				if (!peek) { numGet++; }
 				if (nextCh == '=')
 				{
 					token->type = definition::sym_greatEqual;
 					token->val.stringVal[0] = currCh;
 					token->val.stringVal[1] = nextCh;
-					numGet--;
+					if (peek) { numGet--; }
 				}
 				else
 				{
@@ -675,12 +678,13 @@ public:
 			token->type = literal_string;
 			int j = 0;
 			currCh = file.get();
-			
+			if (!peek) { numGet++; }
 			while (currCh != '"')
 			{
 				token->val.stringVal[j] = currCh;
 				j++;
 				currCh = file.get();
+				if (!peek) { numGet++; }
 			}
 		}
 		break;
@@ -693,6 +697,7 @@ public:
 			{
 				token->val.stringVal[i] = std::tolower(currCh);
 				word.append(std::to_string(currCh));
+				if (!peek) { numGet++; }
 			}
 			file.unget();
 
@@ -707,7 +712,15 @@ public:
 			}
 			else
 			{
-				token->type = id;
+				if (progName && !peek)
+				{
+					token->type = key_progName;
+					progName = false;
+				}
+				else
+				{
+					token->type = id;
+				}
 			}
 
 		}
@@ -722,6 +735,7 @@ public:
 			{
 				token->val.stringVal[i] = std::tolower(currCh);
 				word.push_back(currCh);
+				if (!peek) { numGet++; }
 			}
 			//maybe check if there are numbers in the identifier here?
 			file.unget();
@@ -737,28 +751,55 @@ public:
 			}
 			else
 			{
-				if (progName)
+				if (progName && peek)
 				{
 					token->type = key_progName;
 					progName = false;
+				}
+				else if (progName && !peek)
+				{
+					token->type = key_progName;
 				}
 				else
 				{
 					token->type = id;
 				}
-
 			}
-
 		}
 		break;
 
 		case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
 		{
 			token->type = definition::literal_int;
-			token->val.intVal = currCh - '0';
-			while (isdigit(currCh = file.get()))
-				token->val.intVal = token->val.intVal * 10 + currCh - '0';
+			std::string number;
+			number.push_back(currCh);
+			bool isFloat = false;
+			while (isdigit(currCh) || currCh == '.')
+			{
+				currCh = file.get();
+				if (currCh == '.')
+				{
+					token->type = definition::literal_float;
+					isFloat = true;
+					number.push_back(currCh);
+				}
+				else
+				{
+					number.push_back(currCh);
+				}
+				if (!peek && (isdigit(currCh) || currCh == '.')) { numGet++; }
+			}
 			file.unget();
+			//if (!peek) { numGet--; }
+
+			if (isFloat)
+			{
+				token->val.floatVal = std::stof(number);
+			}
+			else
+			{
+				token->val.intVal = std::stoi(number);
+			}
 		}
 		break;
 
@@ -778,6 +819,7 @@ public:
 		
 		if (token->type != eof && token->type != comment)
 		{
+			if (!peek) { std::cout << "peek: "; }
 			std::cout << '<' << token->type << ',';
 
 			if (token->type == literal_int)
@@ -802,6 +844,8 @@ public:
 				file.unget();
 			}
 		}
+
+		numGet = 0;
 
 		return *token;
 	}
