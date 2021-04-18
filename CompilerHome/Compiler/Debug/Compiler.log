@@ -1,8 +1,7 @@
 ﻿  Parser.cpp
-C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Scanner.h(704,22): warning C4018: '<': signed/unsigned mismatch
-C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Scanner.h(743,22): warning C4018: '<': signed/unsigned mismatch
-C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Parser.cpp(947): warning C4715: 'Parser::Name': not all control paths return a value
-C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Parser.cpp(970): warning C4715: 'Parser::Number': not all control paths return a value
-C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Parser.cpp(982): warning C4715: 'Parser::String': not all control paths return a value
-C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Parser.cpp(890): warning C4715: 'Parser::Factor': not all control paths return a value
+C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Parser.cpp(907): warning C4715: 'Parser::MapVariableToLiteral': not all control paths return a value
+C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Parser.cpp(893): warning C4715: 'Parser::Factor': not all control paths return a value
+C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Parser.cpp(964): warning C4715: 'Parser::Name': not all control paths return a value
+C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Parser.cpp(999): warning C4715: 'Parser::String': not all control paths return a value
+C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Parser.cpp(987): warning C4715: 'Parser::Number': not all control paths return a value
   Compiler.vcxproj -> C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Debug\Compiler.exe

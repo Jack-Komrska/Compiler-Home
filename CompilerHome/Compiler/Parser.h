@@ -79,4 +79,6 @@ public:
 	bool ValidTypesExpression(definition& returnDef, int lhs, int rhs);
 
 	bool ValidTypesAssignment(definition& returnDef, int lhs, int rhs);
+
+	definition MapVariableToLiteral(int def);
 };

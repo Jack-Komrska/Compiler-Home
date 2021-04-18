@@ -32,15 +32,6 @@ void SymbolTable::InsertSymbol(Symbol symbol) //Inserts the symbol at the correc
 {
 	Scope tempScope = GetScope(symbol.getScopeName());
 
-	/*int loc;
-	for (int i = 0; i < symTab.size(); i++)
-	{
-		if (tempScope == symTab.at(i))
-		{
-			loc = i;
-		}
-	}*/
-
 	symTab[tempScope.scopeLoc].symbols.push_back(symbol);
 }
 
@@ -63,16 +54,6 @@ bool SymbolTable::LookupSymbol(std::string str)
 
 Symbol SymbolTable::FindSymbol(std::string str)
 {
-	/*Scope tempScope = GetScope(str);
-
-	for(int i = 0; i < symTab.at(tempScope.scopeLoc).symbols.size(); i++)
-	{
-		if (str == symTab.at(tempScope.scopeLoc).symbols.at(i).getIdentifer())
-		{
-			return symTab.at(tempScope.scopeLoc).symbols.at(i);
-		}
-	}
-	*/
 	for (int i = 0; i < symTab.size(); i++)
 	{
 		for (int j = 0; j < symTab.at(i).symbols.size(); j++)

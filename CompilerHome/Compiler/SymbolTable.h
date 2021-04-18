@@ -2,8 +2,6 @@
 #include "Symbol.h"
 #include "Scope.h"
 #include <vector>
-//#include "Parser.h"
-
 
 class SymbolTable
 {

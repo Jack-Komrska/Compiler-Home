@@ -5,7 +5,6 @@
 
 //*********ERRORS GRAB LINENUM FROM THE SCANNER**********
 
-
 Parser::Parser()
 {
 	scanner = new Scanner("test.txt");
@@ -499,19 +498,21 @@ void Parser::AssignmentStatement()
 	
 	//type check here
 	definition typeReturn;
-	if (!ValidTypesAssignment(typeReturn, dest.getType(), exp.getType()))
+	bool assignCheck = ValidTypesAssignment(typeReturn, dest.getType(), expressionType);
+	
+	if (!assignCheck)
 	{
-		std::cout << "Invalid types at assignment.\n";
+		std::cout << dest.getType() << " and " << expressionType << ", are invalid types.\n";
 	}
 	else
 	{
-		std::cout << dest.getType() << " and " << exp.getType() << ", are valid types.\n";
+		std::cout << dest.getType() << " and " << expressionType << ", are valid types.\n";
 	}
 }
 
 bool Parser::ValidTypesAssignment(definition &returnDef, int lhs, int rhs)
 {
-	if (lhs == num_integer && (rhs == literal_int || rhs == literal_float || rhs == bool_true || rhs == bool_false))
+	if (lhs == num_integer && (rhs == literal_int || rhs == bool_true || rhs == bool_false))
 	{
 		returnDef = num_integer;
 		return true;
@@ -594,7 +595,7 @@ Symbol Parser::Expression(definition& expressionType, Symbol arith)
 	}
 	else
 	{
-		expressionType = definition(arith.getType());
+		expressionType = definition(lhsType);
 		return arith;
 	}
 }
@@ -646,7 +647,7 @@ Symbol Parser::ArithOp(definition &arithType, Symbol relation)
 	}
 	else
 	{
-		arithType = definition(relation.getType());
+		arithType = definition(lhsType);
 		return relation;
 	}
 
@@ -699,7 +700,7 @@ Symbol Parser::Relation(definition &relationType, Symbol term)
 	}
 	else
 	{
-		relationType = definition(term.getType());
+		relationType = definition(lhsType);
 		return term;
 	}
 }
@@ -761,7 +762,7 @@ Symbol Parser::Term(definition &termType, Symbol factor)
 	}
 	else 
 	{
-		termType = definition(factor.getType());
+		termType = definition(lhsType);
 		return factor;
 	}
 }
@@ -828,8 +829,9 @@ Symbol Parser::Factor(definition &factorType)
 		{ 
 			return ProcedureCall();
 		}
-
-		return SymTab.FindSymbol(token.val.stringVal);
+		Symbol id = SymTab.FindSymbol(token.val.stringVal);
+		factorType = MapVariableToLiteral(id.getType());
+		return id;
 	}
 	else if (tempToken.type == sub_op)
 	{
@@ -887,6 +889,20 @@ Symbol Parser::Factor(definition &factorType)
 		std::cout << "Error, Factor.\n";
 	}
 	
+}
+
+definition Parser::MapVariableToLiteral(int def)
+{
+	switch (def) {
+	case num_integer:
+		return literal_int;
+	case num_float:
+		return literal_float;
+	case str:
+		return literal_string;
+	case boolean:
+		return bool_true;
+	}
 }
 
 Symbol Parser::ProcedureCall() //at this point the id is scanned in
