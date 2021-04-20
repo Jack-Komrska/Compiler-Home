@@ -504,6 +504,10 @@ void Parser::Statement() //assignment, if, loop, and return
 	{
 		token = scanner->CallScanner(true);
 	}
+	else
+	{
+		std::cout << "ERROR, a semi colon was expected to be found at the end of your procedure declaration. Line: " << scanner->getLineNum() << std::endl;
+	}
 }
 
 void Parser::AssignmentStatement()

@@ -1,9 +1,2 @@
 ﻿  Main.cpp
-  Parser.cpp
-  Generating Code...
-C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Parser.cpp(1013): warning C4715: 'Parser::MapVariableToLiteral': not all control paths return a value
-C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Parser.cpp(1079): warning C4715: 'Parser::Name': not all control paths return a value
-C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Parser.cpp(1114): warning C4715: 'Parser::String': not all control paths return a value
-C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Parser.cpp(1102): warning C4715: 'Parser::Number': not all control paths return a value
-C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Parser.cpp(999): warning C4715: 'Parser::Factor': not all control paths return a value
   Compiler.vcxproj -> C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Debug\Compiler.exe
