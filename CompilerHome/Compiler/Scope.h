@@ -19,7 +19,7 @@ public:
 	std::string name;
 	std::vector<Symbol> symbols;
 	int scopeLoc;
-	
+	int parent;
 };
 
 

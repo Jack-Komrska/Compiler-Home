@@ -135,15 +135,6 @@ void Parser::Declaration() //calls either procedure/variable declaration
 		else if (tempToken.type == key_global)
 		{
 			token = scanner->CallScanner(true);
-			/*
-			if (SymTab.getScopeLoc() < 2)
-			{
-				Scope global;
-				global.name = "global";
-				global.scopeLoc = SymTab.getScopeLoc();
-				SymTab.AddScope(global);
-			}
-			*/
 			tempToken = scanner->CallScanner(false);
 			tempScope.name = "global";
 
@@ -161,7 +152,6 @@ void Parser::Declaration() //calls either procedure/variable declaration
 		}
 		else if (tempToken.type == key_procedure)
 		{
-			//SymTab.AddScope();
 			token = scanner->CallScanner(true);
 			ProcedureDeclaration();
 		}
@@ -193,7 +183,7 @@ void Parser::ProcedureDeclaration()
 	}
 	else
 	{
-
+		// error sc
 	}
 }
 
@@ -204,10 +194,15 @@ void Parser::ProcedureHeader()
 	if (tempToken.type == id)
 	{
 		token = scanner->CallScanner(true);
-		tempScope.name = token.val.stringVal;
 		Scope scope;
-		scope.name = tempScope.name;
+		scope.name = token.val.stringVal;
 		scope.scopeLoc = SymTab.getScopeLoc();
+		if (tempScope.name != "global")
+		{
+			scope.parent = scope.scopeLoc - 1;
+		}
+		tempScope.name = token.val.stringVal;
+		
 		SymTab.AddScope(scope);
 
 		Symbol procedure; //for adding a new procedure under a new scope
@@ -341,7 +336,10 @@ void Parser::ProcedureBody()
 		if (tempToken.type == key_procedure)
 		{
 			token = scanner->CallScanner(true);
-
+			if (SymTab.GetScope(tempScope.name).parent != 0)
+			{
+				tempScope.name = SymTab.FindScope(SymTab.GetScope(tempScope.name).scopeLoc-1).name;
+			}
 			return;
 		}
 		else

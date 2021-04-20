@@ -17,4 +17,5 @@ public:
 	bool LookupSymbol(std::string str); //check if a symbol exists
 	Symbol FindSymbol(std::string str, Scope scope); //return a symbol
 	int getScopeLoc();
+	Scope FindScope(int scp);
 };

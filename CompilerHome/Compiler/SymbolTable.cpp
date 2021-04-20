@@ -65,3 +65,8 @@ Symbol SymbolTable::FindSymbol(std::string str, Scope scope)
 
 	return Symbol();
 }
+
+Scope SymbolTable::FindScope(int scp)
+{
+	return symTab.at(scp);
+}

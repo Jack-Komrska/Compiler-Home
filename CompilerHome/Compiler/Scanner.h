@@ -143,7 +143,14 @@ public:
 		while (isspace(currCh))
 		{
 			currCh = file.get();
-			if (!peek) { numGet++; }
+			if (!peek) 
+			{ 
+				numGet++;
+				if (currCh == '\n')
+				{
+					lineNum++;
+				}
+			}
 		}
 
 		switch (currCh) {
