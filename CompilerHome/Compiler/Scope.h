@@ -3,6 +3,7 @@
 #include <vector>
 #include "Symbol.h"
 
+
 class Scope
 {
 private:
@@ -20,4 +21,5 @@ public:
 	int scopeLoc;
 	
 };
+
 

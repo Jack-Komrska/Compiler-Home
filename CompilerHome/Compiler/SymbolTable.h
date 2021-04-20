@@ -15,6 +15,6 @@ public:
 	Scope GetScope(std::string str); //gets the scope of a symbol
 	void InsertSymbol(Symbol symbol); //insert a symbol
 	bool LookupSymbol(std::string str); //check if a symbol exists
-	Symbol FindSymbol(std::string str); //return a symbol
+	Symbol FindSymbol(std::string str, Scope scope); //return a symbol
 	int getScopeLoc();
 };

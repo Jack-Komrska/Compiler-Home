@@ -3,8 +3,6 @@
 #include "Scanner.h"
 #include <iostream>
 
-//*********ERRORS GRAB LINENUM FROM THE SCANNER**********
-
 Parser::Parser()
 {
 	scanner = new Scanner("test.txt");
@@ -16,11 +14,13 @@ Parser::Parser()
 
 void Parser::Program()
 {
-	Scope local; //the default local scope
-	local.name = "local";
-	local.scopeLoc = SymTab.getScopeLoc();
-	SymTab.AddScope(local); //adding the global scope at the very beginning
-	tempScope.name = "local";
+	Scope global; //the default local scope
+	global.name = "global";
+	global.scopeLoc = SymTab.getScopeLoc();
+	SymTab.AddScope(global); //adding the global scope at the very beginning
+	tempScope.name = "global";
+
+	BuiltInFunctionDeclarations();
 
 	ProgramHeader();
 
@@ -36,7 +36,7 @@ void Parser::Program()
 	}
 	else
 	{
-		//error .
+		std::cout << "ERROR: Missing perdiod '.', and the end of program on line: " << scanner->getLineNum() << std::endl;
 	}
 }
 
@@ -83,7 +83,10 @@ void Parser::ProgramBody() //contains declarations and statements
 {
 	Declaration();
 	
+	token = scanner->CallScanner(true); //scan in begin
+
 	Token tempToken = scanner->CallScanner(false);
+	tempScope.name = "global";
 	while (tempToken.type != key_end) 
 	{
 		Statement(); //need some form of a while to keep on reading in statements
@@ -126,12 +129,13 @@ void Parser::Declaration() //calls either procedure/variable declaration
 
 		if (tempToken.type == key_begin)
 		{
-			token = scanner->CallScanner(true);
+			//token = scanner->CallScanner(true);
 			break;
 		}
 		else if (tempToken.type == key_global)
 		{
 			token = scanner->CallScanner(true);
+			/*
 			if (SymTab.getScopeLoc() < 2)
 			{
 				Scope global;
@@ -139,7 +143,7 @@ void Parser::Declaration() //calls either procedure/variable declaration
 				global.scopeLoc = SymTab.getScopeLoc();
 				SymTab.AddScope(global);
 			}
-
+			*/
 			tempToken = scanner->CallScanner(false);
 			tempScope.name = "global";
 
@@ -162,7 +166,7 @@ void Parser::Declaration() //calls either procedure/variable declaration
 			ProcedureDeclaration();
 		}
 		else if (tempToken.type == key_variable)
-		{
+		{			
 			token = scanner->CallScanner(true);
 			VariableDeclaration();
 		}
@@ -180,6 +184,17 @@ void Parser::ProcedureDeclaration()
 	ProcedureHeader();
 
 	ProcedureBody();
+
+	Token tempToken = scanner->CallScanner(false);
+
+	if (tempToken.type == sym_sc)
+	{
+		token = scanner->CallScanner(true);
+	}
+	else
+	{
+
+	}
 }
 
 void Parser::ProcedureHeader()
@@ -189,11 +204,25 @@ void Parser::ProcedureHeader()
 	if (tempToken.type == id)
 	{
 		token = scanner->CallScanner(true);
+		tempScope.name = token.val.stringVal;
+		Scope scope;
+		scope.name = tempScope.name;
+		scope.scopeLoc = SymTab.getScopeLoc();
+		SymTab.AddScope(scope);
 
-		Symbol procedure;
+		Symbol procedure; //for adding a new procedure under a new scope
 		procedure.setIdentifier(token.val.stringVal);
 		procedure.setIsProcedure(true);
-		tempScope.name = token.val.stringVal;
+		
+		if (tempScope.name != "global")
+		{
+			procedure.setScopeName(tempScope.name);
+		}
+		else
+		{
+			Scope parent = SymTab.GetScope(tempScope.name);
+			tempScope.name = token.val.stringVal;
+		}
 
 		tempToken = scanner->CallScanner(false);
 
@@ -207,7 +236,7 @@ void Parser::ProcedureHeader()
 			{
 				token = scanner->CallScanner(true);
 				procedure.setType(token.type);
-
+				SymTab.InsertSymbol(procedure);
 				tempToken = scanner->CallScanner(false);
 
 				if (tempToken.type == sym_lparen)
@@ -221,7 +250,7 @@ void Parser::ProcedureHeader()
 					if (tempToken.type == sym_rparen)
 					{
 						token = scanner->CallScanner(true);
-
+						
 						return;
 					}
 					else
@@ -270,6 +299,10 @@ void Parser::ParameterList()
 		token = scanner->CallScanner(true);
 
 		ParameterList();
+	}
+	else if (tempToken.type == sym_rparen)
+	{
+		return;
 	}
 }
 
@@ -379,6 +412,7 @@ void Parser::VariableDeclaration()
 							if (tempToken.type == sym_sc)
 							{
 								token = scanner->CallScanner(true);
+								SymTab.InsertSymbol(id);
 								return;
 							}
 							else
@@ -398,9 +432,14 @@ void Parser::VariableDeclaration()
 				}
 				else if (tempToken.type == sym_sc || tempToken.type == sym_rparen || tempToken.type == sym_comma)
 				{
-					token = scanner->CallScanner(true);
 					id.setIsArr(false);
 					SymTab.InsertSymbol(id);
+					if (tempToken.type == sym_sc)
+					{
+						token = scanner->CallScanner(true);
+					}
+					
+					
 					return;
 				}
 				else
@@ -468,12 +507,13 @@ void Parser::Statement() //assignment, if, loop, and return
 
 	tempToken = scanner->CallScanner(false);
 
-	if (tempToken.type != sym_sc)
+	if (tempToken.type == sym_sc)
 	{
-		std::cout << "not a ;\n";
+		token = scanner->CallScanner(true);
+		//std::cout << "not a ;\n";
 	}
 
-	token = scanner->CallScanner(true);
+	
 }
 
 void Parser::AssignmentStatement()
@@ -539,7 +579,45 @@ Symbol Parser::Destination()
 {
 	if (token.type == id) //already scanned
 	{
-		return SymTab.FindSymbol(token.val.stringVal);
+		Symbol destination;
+		//std::cout << token.val.stringVal << std::endl;
+		//std::cout << tempScope.name << std::endl;
+		destination = SymTab.FindSymbol(token.val.stringVal, SymTab.GetScope(tempScope.name));
+		if (destination.getArray() == true)
+		{
+			Token tempToken = scanner->CallScanner(false);
+
+			if (tempToken.type == sym_lbrack)
+			{
+				token = scanner->CallScanner(true);
+
+				tempToken = scanner->CallScanner(false);
+
+				if (tempToken.type == literal_int)
+				{
+					token = scanner->CallScanner(true);
+
+					tempToken = scanner->CallScanner(false);
+
+					if (tempToken.type == sym_rbrack)
+					{
+						token = scanner->CallScanner(true);
+						
+						return destination;
+					}
+					else
+					{
+						// error ]
+					}
+				}
+				else
+				{
+					//error number
+				}
+			}
+		}
+
+		return destination;
 	}
 	else
 	{
@@ -821,15 +899,44 @@ Symbol Parser::Factor(definition &factorType)
 	}
 	else if (tempToken.type == id)
 	{
-		token = scanner->CallScanner(true);
+		token = scanner->CallScanner(true); //scan in the id
 
 		tempToken = scanner->CallScanner(false);
 
 		if (tempToken.type == sym_lparen)
 		{ 
-			return ProcedureCall();
+			Symbol procedure = ProcedureCall();
+			factorType = MapVariableToLiteral(procedure.getType());
+			return procedure;
 		}
-		Symbol id = SymTab.FindSymbol(token.val.stringVal);
+		else if (tempToken.type == sym_lbrack)
+		{
+			Symbol arr = SymTab.FindSymbol(token.val.stringVal, SymTab.GetScope(tempScope.name));
+			factorType = MapVariableToLiteral(arr.getType());
+
+			token = scanner->CallScanner(true); //scan in brack after assignment to symbol
+
+			tempToken = scanner->CallScanner(false);
+
+			if (tempToken.type == literal_int)
+			{
+				token = scanner->CallScanner(true);
+				Number();
+				
+				tempToken = scanner->CallScanner(false);
+
+				if (tempToken.type == sym_rbrack)
+				{
+					token = scanner->CallScanner(true);
+					return arr;
+				}
+			}
+			else
+			{
+				//error num
+			}
+		}
+		Symbol id = SymTab.FindSymbol(token.val.stringVal, SymTab.GetScope(tempScope.name));
 		factorType = MapVariableToLiteral(id.getType());
 		return id;
 	}
@@ -843,7 +950,9 @@ Symbol Parser::Factor(definition &factorType)
 		if (tempToken.type == id)
 		{
 			token = scanner->CallScanner(true);
-			return Name();
+			Symbol name = Name();
+			factorType = MapVariableToLiteral(name.getType());
+			return name;
 		}
 		else if (tempToken.type == literal_int || tempToken.type == literal_float)
 		{
@@ -911,9 +1020,16 @@ Symbol Parser::ProcedureCall() //at this point the id is scanned in
 	Symbol procedureCall;
 	if (isIn)
 	{
-		procedureCall = SymTab.FindSymbol(token.val.stringVal);
-		
-		//HELP
+		if (SymTab.GetScope(token.val.stringVal).name != "")
+		{
+			Scope procScope = SymTab.GetScope(token.val.stringVal);
+			procedureCall = SymTab.FindSymbol(token.val.stringVal, procScope);
+			
+		}
+		else
+		{
+			procedureCall = SymTab.FindSymbol(token.val.stringVal, SymTab.GetScope("global"));
+		}
 
 		token = scanner->CallScanner(true); //already know it is a procedure call
 
@@ -923,6 +1039,7 @@ Symbol Parser::ProcedureCall() //at this point the id is scanned in
 			ArgumentList();
 		}
 		
+		token = scanner->CallScanner(true);
 	}
 
 	return procedureCall;
@@ -940,8 +1057,9 @@ void Parser::ArgumentList()
 
 		ArgumentList();
 	}
-	else if (token.type == sym_rparen)
+	else if (tempToken.type == sym_rparen)
 	{
+		token = scanner->CallScanner(true);
 		return;
 	}
 	else
@@ -954,7 +1072,7 @@ Symbol Parser::Name()
 {
 	if (token.type == id)
 	{
-		return SymTab.FindSymbol(token.val.stringVal);
+		return SymTab.FindSymbol(token.val.stringVal, SymTab.GetScope(tempScope.name));
 	}
 	else
 	{
@@ -1098,54 +1216,68 @@ void Parser::LoopStatement()
 	if (tempToken.type == sym_lparen)
 	{
 		token = scanner->CallScanner(true);
-
-		AssignmentStatement();
-
-		definition expressionType;
-		Expression(expressionType);
-
+		
 		tempToken = scanner->CallScanner(false);
 
-		if (tempToken.type == sym_rparen)
+		if (tempToken.type == id)
 		{
 			token = scanner->CallScanner(true);
 
-			//while loop for statements
-			Token tempToken = scanner->CallScanner(false);
-			while (tempToken.type != key_end)
-			{
-				Statement(); //need some form of a while to keep on reading in statements
-
-				tempToken = scanner->CallScanner(false);
-			}
+			AssignmentStatement();
 
 			tempToken = scanner->CallScanner(false);
 
-			if (tempToken.type == key_end)
+			if (tempToken.type == sym_sc)
 			{
 				token = scanner->CallScanner(true);
-					
+				
+				definition expressionType;
+				Expression(expressionType);
+
 				tempToken = scanner->CallScanner(false);
 
-				if (tempToken.type == key_for)
+				if (tempToken.type == sym_rparen)
 				{
 					token = scanner->CallScanner(true);
 
-					return;
+					//while loop for statements
+					Token tempToken = scanner->CallScanner(false);
+					while (tempToken.type != key_end)
+					{
+						Statement(); //need some form of a while to keep on reading in statements
+
+						tempToken = scanner->CallScanner(false);
+					}
+
+					tempToken = scanner->CallScanner(false);
+
+					if (tempToken.type == key_end)
+					{
+						token = scanner->CallScanner(true);
+
+						tempToken = scanner->CallScanner(false);
+
+						if (tempToken.type == key_for)
+						{
+							token = scanner->CallScanner(true);
+
+							return;
+						}
+						else
+						{
+							//error for
+						}
+					}
+					else
+					{
+						//error end
+					}
 				}
 				else
 				{
-					//error for
+					//error )
 				}
 			}
-			else
-			{
-				//error end
-			}
-		}
-		else
-		{
-			//error )
 		}
 	}
 }
@@ -1154,4 +1286,79 @@ void Parser::ReturnStatement()
 {
 	definition expressionType;
 	Expression(expressionType);
+}
+
+void Parser::BuiltInFunctionDeclarations()
+{
+	Symbol getBool;
+	getBool.setIdentifier("getbool");
+	getBool.setIsGlobal(true);
+	getBool.setIsProcedure(true);
+	getBool.setScopeName("global");
+	getBool.setType(4);
+	SymTab.InsertSymbol(getBool);
+
+	Symbol getInteger;
+	getInteger.setIdentifier("getinteger");
+	getInteger.setIsGlobal(true);
+	getInteger.setIsProcedure(true);
+	getInteger.setScopeName("global");
+	getInteger.setType(5);
+	SymTab.InsertSymbol(getInteger);
+
+	Symbol getFloat;
+	getFloat.setIdentifier("getfloat");
+	getFloat.setIsGlobal(true);
+	getFloat.setIsProcedure(true);
+	getFloat.setScopeName("global");
+	getFloat.setType(6);
+	SymTab.InsertSymbol(getFloat);
+
+	Symbol getString;
+	getString.setIdentifier("getstring");
+	getString.setIsGlobal(true);
+	getString.setIsProcedure(true);
+	getString.setScopeName("global");
+	getString.setType(3);
+	SymTab.InsertSymbol(getString);
+
+	Symbol putBool;
+	putBool.setIdentifier("putbool");
+	putBool.setIsGlobal(true);
+	putBool.setIsProcedure(true);
+	putBool.setScopeName("global");
+	putBool.setType(4);
+	SymTab.InsertSymbol(putBool);
+
+	Symbol putInteger;
+	putInteger.setIdentifier("putinteger");
+	putInteger.setIsGlobal(true);
+	putInteger.setIsProcedure(true);
+	putInteger.setScopeName("global");
+	putInteger.setType(4);
+	SymTab.InsertSymbol(putInteger);
+
+	Symbol putFloat;
+	putFloat.setIdentifier("putfloat");
+	putFloat.setIsGlobal(true);
+	putFloat.setIsProcedure(true);
+	putFloat.setScopeName("global");
+	putFloat.setType(4);
+	SymTab.InsertSymbol(putFloat);
+
+	Symbol putString;
+	putString.setIdentifier("putstring");
+	putString.setIsGlobal(true);
+	putString.setIsProcedure(true);
+	putString.setScopeName("global");
+	putString.setType(4);
+	SymTab.InsertSymbol(putString);
+
+	Symbol sqrt;
+	sqrt.setIdentifier("sqrt");
+	sqrt.setIsGlobal(true);
+	sqrt.setIsProcedure(true);
+	sqrt.setScopeName("global");
+	sqrt.setType(6);
+	SymTab.InsertSymbol(sqrt);
 }

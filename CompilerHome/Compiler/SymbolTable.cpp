@@ -26,6 +26,7 @@ Scope SymbolTable::GetScope(std::string str)
 			return symTab.at(i);
 		}
 	}
+	return Scope();
 }
 
 void SymbolTable::InsertSymbol(Symbol symbol) //Inserts the symbol at the correct scope of the symbol table
@@ -52,20 +53,15 @@ bool SymbolTable::LookupSymbol(std::string str)
 	return false;
 }
 
-Symbol SymbolTable::FindSymbol(std::string str)
+Symbol SymbolTable::FindSymbol(std::string str, Scope scope)
 {
-	for (int i = 0; i < symTab.size(); i++)
+	for (int i = 0; i < symTab.at(GetScope(scope.name).scopeLoc).symbols.size(); i++)
 	{
-		for (int j = 0; j < symTab.at(i).symbols.size(); j++)
+		if (symTab.at(GetScope(scope.name).scopeLoc).symbols.at(i).getIdentifer() == str)
 		{
-			if (symTab.at(i).symbols.at(j).getIdentifer() == str)
-			{
-				return symTab.at(i).symbols.at(j);
-			}
+			return symTab.at(GetScope(scope.name).scopeLoc).symbols.at(i);
 		}
-
 	}
 
-	//return empty symbol if we cannot find it
 	return Symbol();
 }

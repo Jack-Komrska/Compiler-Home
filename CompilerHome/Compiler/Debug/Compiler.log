@@ -1,7 +1,9 @@
-﻿  Parser.cpp
-C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Parser.cpp(907): warning C4715: 'Parser::MapVariableToLiteral': not all control paths return a value
-C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Parser.cpp(893): warning C4715: 'Parser::Factor': not all control paths return a value
-C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Parser.cpp(964): warning C4715: 'Parser::Name': not all control paths return a value
-C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Parser.cpp(999): warning C4715: 'Parser::String': not all control paths return a value
-C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Parser.cpp(987): warning C4715: 'Parser::Number': not all control paths return a value
+﻿  Main.cpp
+  Parser.cpp
+  Generating Code...
+C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Parser.cpp(1017): warning C4715: 'Parser::MapVariableToLiteral': not all control paths return a value
+C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Parser.cpp(1083): warning C4715: 'Parser::Name': not all control paths return a value
+C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Parser.cpp(1118): warning C4715: 'Parser::String': not all control paths return a value
+C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Parser.cpp(1106): warning C4715: 'Parser::Number': not all control paths return a value
+C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Compiler\Parser.cpp(1003): warning C4715: 'Parser::Factor': not all control paths return a value
   Compiler.vcxproj -> C:\Users\jkten\Documents\Compiler\Compiler\CompilerHome\Debug\Compiler.exe

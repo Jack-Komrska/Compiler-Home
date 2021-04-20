@@ -85,6 +85,11 @@ public:
 		map[","] = sym_comma;
 	}
 
+	int getLineNum()
+	{
+		return lineNum;
+	}
+
 	bool isAlphaNum(char cha)
 	{
 		if (isalpha(cha))
@@ -92,6 +97,10 @@ public:
 			return true;
 		}
 		else if (isdigit(cha))
+		{
+			return true;
+		}
+		else if (cha == '_')
 		{
 			return true;
 		}
@@ -349,7 +358,7 @@ public:
 			token->val.stringVal[0] = tolower(currCh);
 			std::string word;
 			word.push_back(tolower(currCh));
-			for (int i = 1; isalpha(currCh = file.get()); i++) //make a function that checks it is either a number or letter (should be pretty simple)
+			for (int i = 1; isAlphaNum(currCh = file.get()); i++) //make a function that checks it is either a number or letter (should be pretty simple)
 			{
 				currCh = tolower(currCh);
 				token->val.stringVal[i] = std::tolower(currCh);
@@ -386,7 +395,7 @@ public:
 			token->val.stringVal[0] = tolower(currCh);
 			std::string word;
 			word.push_back(tolower(currCh));
-			for (int i = 1; isalpha(currCh = file.get()); i++) //make a function that checks it is either a number or letter (should be pretty simple)
+			for (int i = 1; isAlphaNum(currCh = file.get()); i++) //make a function that checks it is either a number or letter (should be pretty simple)
 			{
 				token->val.stringVal[i] = tolower(currCh);
 				word.push_back(tolower(currCh));

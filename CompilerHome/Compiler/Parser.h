@@ -11,8 +11,8 @@ class Parser
 	SymbolTable SymTab;
 	Scanner *scanner;
 	Token token;
-	Scope tempScope;
-
+	Scope tempScope; //the current scope of the parsing
+	//bool isChild = false;
 public:
 	Parser();
 
@@ -81,4 +81,6 @@ public:
 	bool ValidTypesAssignment(definition& returnDef, int lhs, int rhs);
 
 	definition MapVariableToLiteral(int def);
+
+	void BuiltInFunctionDeclarations();
 };
