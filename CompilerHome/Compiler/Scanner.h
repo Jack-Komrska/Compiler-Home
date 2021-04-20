@@ -15,7 +15,7 @@ class Scanner
 	std::ifstream file; // the file
 	std::string fileName; // file name - may turn into path
 	int lineNum; //line number
-	int numGet;
+	int numGet; //for tracking the peek
 	
 public:
 	Scanner() {};
@@ -120,7 +120,7 @@ public:
 	{ //middle man for ignoring comments
 		Token temp;
 		
-		do {
+		do { //need to call ScanToken at least once
 			temp = ScanToken(isScan);
 			
 		} while (temp.type == comment); //only reruns the loop if the type is a comment
@@ -159,11 +159,11 @@ public:
 			{
 				nextCh = file.get();
 				numGet++;
-				if (nextCh == '/') //finds the end of the line
+				if (nextCh == '/') 
 				{
 					token->type = comment;
 
-					getEndLine();
+					getEndLine(); //finds the end of the line
 
 					while (isspace(currCh))
 					{
@@ -178,7 +178,7 @@ public:
 				{
 					token->type = comment;
 
-					int commentBlocks = 1;
+					int commentBlocks = 1; //keeps track of comment blocks
 
 					while (commentBlocks > 0)
 					{
@@ -216,7 +216,7 @@ public:
 		break;
 
 		case '(': case ')': case '.': case '=': case ';': case '+': case '*': case '-': case '%': case '[': case ']': case ':': case '<': case '>': case ',':
-		{
+		{ //cases for most symbols
 			if (currCh == '(')
 			{
 				token->type = definition::sym_lparen;
@@ -345,7 +345,7 @@ public:
 		break;
 
 		case '"':
-		{
+		{ //for string literals
 			token->type = literal_string;
 			int j = 0;
 			currCh = file.get();
@@ -361,7 +361,7 @@ public:
 		break;
 
 		case 'A': case 'B': case 'C': case 'D': case 'E': case 'F': case 'G': case 'H': case 'I': case 'J': case 'K': case 'L': case 'M': case 'N': case 'O': case 'P': case 'Q': case 'R': case 'S': case 'T': case 'U': case 'V': case 'W': case 'X': case 'Y': case 'Z':
-		{
+		{ //I believe visual studio cannot handle cases with a proper range
 			token->val.stringVal[0] = tolower(currCh);
 			std::string word;
 			word.push_back(tolower(currCh));
@@ -372,7 +372,6 @@ public:
 				word.push_back(currCh);
 				if (!peek) { numGet++; }
 			}
-			//maybe check if there are numbers in the identifier here?
 			file.unget();
 			if (map.count(word) > 0)
 			{
@@ -402,13 +401,13 @@ public:
 			token->val.stringVal[0] = tolower(currCh);
 			std::string word;
 			word.push_back(tolower(currCh));
-			for (int i = 1; isAlphaNum(currCh = file.get()); i++) //make a function that checks it is either a number or letter (should be pretty simple)
+			for (int i = 1; isAlphaNum(currCh = file.get()); i++)
 			{
 				token->val.stringVal[i] = tolower(currCh);
 				word.push_back(tolower(currCh));
 				if (!peek) { numGet++; }
 			}
-			//maybe check if there are numbers in the identifier here?
+			
 			file.unget();
 
 			if (map.count(word) > 0)
@@ -435,7 +434,7 @@ public:
 		break;
 
 		case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
-		{
+		{ //for literal ints
 			token->type = definition::literal_int;
 			std::string number;
 			number.push_back(currCh);
@@ -482,8 +481,8 @@ public:
 		}
 			break;
 		}
-		
-		if (token->type != eof && token->type != comment)
+		/*
+		if (token->type != eof && token->type != comment) //uncomment this block for the program to print out each token being scanned/peeked
 		{
 			if (!peek) { std::cout << "peek: "; }
 			std::cout << '<' << token->type << ',';
@@ -502,8 +501,8 @@ public:
 			}
 			std::cout << '\n';
 		}
-		
-		if (token->type != comment)
+		*/
+		if (token->type != comment) //to handle the peek function
 		{
 			for (int z = 0; z < numGet; z++)
 			{

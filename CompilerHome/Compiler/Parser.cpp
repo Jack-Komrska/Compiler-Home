@@ -3,9 +3,9 @@
 #include "Scanner.h"
 #include <iostream>
 
-Parser::Parser()
+Parser::Parser(std::string fName)
 {
-	scanner = new Scanner("test.txt");
+	scanner = new Scanner(fName); //pass the file name to the scanner
 
 	Program();
 
@@ -20,9 +20,9 @@ void Parser::Program()
 	SymTab.AddScope(global); //adding the global scope at the very beginning
 	tempScope.name = "global";
 
-	BuiltInFunctionDeclarations();
+	BuiltInFunctionDeclarations(); //adds the bulit in functions to the global scope
 
-	ProgramHeader();
+	ProgramHeader(); //program builds out from the project language document
 
 	ProgramBody();
 
@@ -40,10 +40,10 @@ void Parser::Program()
 	}
 }
 
-void Parser::ProgramHeader() // add elses for errors
+void Parser::ProgramHeader()
 {
 	Token tempToken = scanner->CallScanner(false);
-
+	// for almost every single check, we check if the peeked token is what we need, and then we scan it in
 	if (tempToken.type == key_program)
 	{
 		token = scanner->CallScanner(true);
@@ -64,18 +64,18 @@ void Parser::ProgramHeader() // add elses for errors
 			}
 			else
 			{
-				std::cout << "Error finding the key 'is', in program.\n";
+				std::cout << "ERROR, finding the key 'is', in program.\n";
 				//return; //need to not run the body
 			}
 		}
 		else
 		{
-			std::cout << "Error finding the program name, in program.\n";
+			std::cout << "ERROR, finding the program name, in program on line: " << scanner->getLineNum() << std::endl;
 		}
 	}
 	else
 	{
-		std::cout << "Error finding the key 'program', in program.\n";
+		std::cout << "ERROR, finding the key 'program', in program on line: " << scanner->getLineNum() << std::endl;
 	}
 }
 
@@ -89,35 +89,32 @@ void Parser::ProgramBody() //contains declarations and statements
 	tempScope.name = "global";
 	while (tempToken.type != key_end) 
 	{
-		Statement(); //need some form of a while to keep on reading in statements
+		Statement(); //calls statemnet repeatedly until end is scanned
 		
 		tempToken = scanner->CallScanner(false);
 	}
-	
-
-	//tempToken = scanner->CallScanner(false);
 
 	if (tempToken.type == key_end)
 	{
-		std::cout << "This should be end\t";
+		//std::cout << "This should be end\t"; //uncomment the beginning of the line to check if the end lines up
 		token = scanner->CallScanner(true);
 
 		tempToken = scanner->CallScanner(false);
 		
 		if (tempToken.type == key_program)
 		{
-			std::cout << "This should be program\t"; 
+			//std::cout << "This should be program\t"; 
 			token = scanner->CallScanner(true);
 			return;
 		}
 		else
 		{
-			//error looking for program
+			std::cout << "ERROR, finding the key 'program', in program on line: " << scanner->getLineNum() << std::endl;
 		}
 	}
 	else
 	{
-		//error looking for end
+		std::cout << "ERROR, finding the key 'end', in program on line: " << scanner->getLineNum() << std::endl;
 	}
 }
 
@@ -133,12 +130,12 @@ void Parser::Declaration() //calls either procedure/variable declaration
 			break;
 		}
 		else if (tempToken.type == key_global)
-		{
+		{ //making sure the variable we are inserting into the symbol table is of the global scope
 			token = scanner->CallScanner(true);
 			tempToken = scanner->CallScanner(false);
 			tempScope.name = "global";
 
-			if (tempToken.type == key_variable)
+			if (tempToken.type == key_variable) //matching it to either a procedure or a variable and calling the appropriate function
 			{
 				token = scanner->CallScanner(true);
 				
@@ -161,15 +158,14 @@ void Parser::Declaration() //calls either procedure/variable declaration
 			VariableDeclaration();
 		}
 		//tempToken = scanner->CallScanner(false); //determines if it is either a procedure/variable
-		
 		else
 		{
-			std::cout << "Error, declaration.\n";
+			std::cout << "ERROR, your program does not follow the guidelines for a declaration. Line: " << scanner->getLineNum() << std::endl;
 		}
 	}
 }
 
-void Parser::ProcedureDeclaration()
+void Parser::ProcedureDeclaration() //the procedure tree
 {
 	ProcedureHeader();
 
@@ -183,7 +179,7 @@ void Parser::ProcedureDeclaration()
 	}
 	else
 	{
-		// error sc
+		std::cout << "ERROR, a semi colon was expected to be found at the end of your procedure declaration. Line: " << scanner->getLineNum() << std::endl;
 	}
 }
 
@@ -198,7 +194,7 @@ void Parser::ProcedureHeader()
 		scope.name = token.val.stringVal;
 		scope.scopeLoc = SymTab.getScopeLoc();
 		if (tempScope.name != "global")
-		{
+		{ //if the procedure has a subprocedure we ensure it knows which scope is its parent
 			scope.parent = scope.scopeLoc - 1;
 		}
 		tempScope.name = token.val.stringVal;
@@ -209,7 +205,7 @@ void Parser::ProcedureHeader()
 		procedure.setIdentifier(token.val.stringVal);
 		procedure.setIsProcedure(true);
 		
-		if (tempScope.name != "global")
+		if (tempScope.name != "global") //a check to see if the parent is global or another procedure
 		{
 			procedure.setScopeName(tempScope.name);
 		}
@@ -230,7 +226,7 @@ void Parser::ProcedureHeader()
 			if (TypeMark(tempToken.type))
 			{
 				token = scanner->CallScanner(true);
-				procedure.setType(token.type);
+				procedure.setType(token.type); //adding the type to the function call
 				SymTab.InsertSymbol(procedure);
 				tempToken = scanner->CallScanner(false);
 
@@ -238,7 +234,7 @@ void Parser::ProcedureHeader()
 				{
 					token = scanner->CallScanner(true);
 
-					ParameterList();
+					ParameterList(); //calling parameter list
 
 					tempToken = scanner->CallScanner(false);
 
@@ -250,27 +246,27 @@ void Parser::ProcedureHeader()
 					}
 					else
 					{
-						//error )
+						std::cout << "ERROR, a right parentheses was expected to be found in your procedure header. Line: " << scanner->getLineNum() << std::endl;
 					}
 				}
 				else
 				{
-					//error (
+					std::cout << "ERROR, a left parentheses was expected to be found in your procedure header. Line: " << scanner->getLineNum() << std::endl;
 				}
 			}
 			else
 			{
-				//error type mark
+				std::cout << "ERROR, a Type Mark was expected to be found in your procedure header. Line: " << scanner->getLineNum() << std::endl;
 			}
 		}
 		else
 		{
-			//error :
+			std::cout << "ERROR, a colon was expected to be found in your procedure header. Line: " << scanner->getLineNum() << std::endl;
 		}
 	}
 	else
 	{
-		//error id
+		std::cout << "ERROR, an identifier was expected to be found in your procedure header. Line: " << scanner->getLineNum() << std::endl;
 	}
 }
 
@@ -293,7 +289,7 @@ void Parser::ParameterList()
 	{
 		token = scanner->CallScanner(true);
 
-		ParameterList();
+		ParameterList(); //recursivley calls itself until it is ready to move on
 	}
 	else if (tempToken.type == sym_rparen)
 	{
@@ -303,7 +299,7 @@ void Parser::ParameterList()
 
 void Parser::Parameter()
 {
-	VariableDeclaration();
+	VariableDeclaration(); //just calls variable declaration
 }
 
 void Parser::ProcedureBody()
@@ -319,7 +315,7 @@ void Parser::ProcedureBody()
 		Token tempToken = scanner->CallScanner(false);
 		while (tempToken.type != key_end)
 		{
-			Statement(); //need some form of a while to keep on reading in statements
+			Statement(); //recursive call
 
 			tempToken = scanner->CallScanner(false);
 		}
@@ -338,22 +334,22 @@ void Parser::ProcedureBody()
 			token = scanner->CallScanner(true);
 			if (SymTab.GetScope(tempScope.name).parent != 0)
 			{
-				tempScope.name = SymTab.FindScope(SymTab.GetScope(tempScope.name).scopeLoc-1).name;
+				tempScope.name = SymTab.FindScope(SymTab.GetScope(tempScope.name).scopeLoc-1).name; //if the scope has a parent, we make sure it goes to that scope and not global
 			}
 			return;
 		}
 		else
 		{
-			//error looking for procedure
+			std::cout << "ERROR, a procedure was expected to be found in your procedure body. Line: " << scanner->getLineNum() << std::endl;
 		}
 	}
 	else
 	{
-		//error looking for end
+		std::cout << "ERROR, an end was expected to be found in your procedure body. Line: " << scanner->getLineNum() << std::endl;
 	}
 }
 
-void Parser::VariableDeclaration()
+void Parser::VariableDeclaration() //declaring the variable
 {
 	Token tempToken = scanner->CallScanner(false); //scanning for the identifier
 
@@ -368,7 +364,7 @@ void Parser::VariableDeclaration()
 			id.setIsGlobal(true);
 		}
 		
-		id.setScopeName(tempScope.name);
+		id.setScopeName(tempScope.name); //adding the proper scope to it
 
 		tempToken = scanner->CallScanner(false);
 
@@ -415,17 +411,17 @@ void Parser::VariableDeclaration()
 							}
 							else
 							{
-								//error sc
+								std::cout << "ERROR, finding a semi colon, in program on line: " << scanner->getLineNum() << std::endl;
 							}
 						}
 						else
 						{
-							std::cout << "Error, we were expecting a right bracket.\n";
+							std::cout << "ERROR, we were expecting a right bracket on line: " << scanner->getLineNum() << std::endl;
 						}
 					}
 					else
 					{
-						std::cout << "Error, we were expecting an integer.\n";
+						std::cout << "ERROR, we were expecting an integer on line: " << scanner->getLineNum() << std::endl;
 					}
 				}
 				else if (tempToken.type == sym_sc || tempToken.type == sym_rparen || tempToken.type == sym_comma)
@@ -437,31 +433,30 @@ void Parser::VariableDeclaration()
 						token = scanner->CallScanner(true);
 					}
 					
-					
 					return;
 				}
 				else
 				{
-					std::cout << "Error, we were expecting a semi colon or a bracket.\n";
+					std::cout << "ERROR, a semi colon was expected to be found in your variable declaration. Line: " << scanner->getLineNum() << std::endl;
 				}
 			}
 			else
 			{
-				std::cout << "Error, we were expecting a type mark.\n";
+				std::cout << "ERROR, a Type Mark was expected to be found in your variable declaration. Line: " << scanner->getLineNum() << std::endl;
 			}
 		}
 		else
 		{
-			std::cout << "Error, we were expecting a colon.\n";
+			std::cout << "ERROR, a colon was expected to be found in your variable declaration. Line: " << scanner->getLineNum() << std::endl;
 		}
 	}
 	else
 	{
-		std::cout << "Error, we were expecting an identifier for a variable declaration.\n";
+		std::cout << "ERROR, an identifier was expected to be found in your variable declaration. Line: " << scanner->getLineNum() << std::endl;
 	}
 }
 
-bool Parser::TypeMark(definition type)
+bool Parser::TypeMark(definition type) //makes sure the token scanned in is of the correct type mark and returns a bool
 {
 	if (type == num_integer || type == num_float || type == str || type == boolean)
 	{
@@ -500,7 +495,7 @@ void Parser::Statement() //assignment, if, loop, and return
 	}
 	else
 	{
-		std::cout << "Error, a statement declaration was expected.\n";
+		std::cout << "ERROR, a statement declaration was expected on line: " << scanner->getLineNum() << std::endl;
 	}
 
 	tempToken = scanner->CallScanner(false);
@@ -508,10 +503,7 @@ void Parser::Statement() //assignment, if, loop, and return
 	if (tempToken.type == sym_sc)
 	{
 		token = scanner->CallScanner(true);
-		//std::cout << "not a ;\n";
 	}
-
-	
 }
 
 void Parser::AssignmentStatement()
@@ -528,11 +520,11 @@ void Parser::AssignmentStatement()
 	}
 	else
 	{
-		//error :=
+		std::cout << "ERROR, a assignment expression or := was expected to be found in your Assignment Statement. Line: " << scanner->getLineNum() << std::endl;
 	}
 
 	definition expressionType;
-	Symbol exp = Expression(expressionType);
+	Symbol exp = Expression(expressionType); //calls the expression tree
 	
 	//type check here
 	definition typeReturn;
@@ -548,7 +540,7 @@ void Parser::AssignmentStatement()
 	}
 }
 
-bool Parser::ValidTypesAssignment(definition &returnDef, int lhs, int rhs)
+bool Parser::ValidTypesAssignment(definition &returnDef, int lhs, int rhs) //checks if the types match upon assignment
 {
 	if (lhs == num_integer && (rhs == literal_int || rhs == bool_true || rhs == bool_false))
 	{
@@ -578,9 +570,9 @@ Symbol Parser::Destination()
 	if (token.type == id) //already scanned
 	{
 		Symbol destination;
-		//std::cout << token.val.stringVal << std::endl;
+		//std::cout << token.val.stringVal << std::endl; //checks
 		//std::cout << tempScope.name << std::endl;
-		destination = SymTab.FindSymbol(token.val.stringVal, SymTab.GetScope(tempScope.name));
+		destination = SymTab.FindSymbol(token.val.stringVal, SymTab.GetScope(tempScope.name)); //finds the symbol in the symbol table using the tempScope
 		if (destination.getArray() == true)
 		{
 			Token tempToken = scanner->CallScanner(false);
@@ -605,12 +597,12 @@ Symbol Parser::Destination()
 					}
 					else
 					{
-						// error ]
+						std::cout << "ERROR, a right bracket was expected to be found apart of your array. Line: " << scanner->getLineNum() << std::endl;
 					}
 				}
 				else
 				{
-					//error number
+					std::cout << "ERROR, integers are the only type compatible with arrays. Line: " << scanner->getLineNum() << std::endl;
 				}
 			}
 		}
@@ -619,14 +611,18 @@ Symbol Parser::Destination()
 	}
 	else
 	{
-		std::cout << "Error, we were expecting an identifier for a variable declaration.\n";
+		std::cout << "ERROR, an identifier was expected in your Destination. Line: " << scanner->getLineNum() << std::endl;
 		return Symbol();
 	}
 }
-
+/*
+Everything in the expression tree uses the same logic as Expression()
+if the symbol being passed in (empty by default) is empty, we go down the tree til we return the correct token
+Does a type check comparisons back up the tree
+*/
 Symbol Parser::Expression(definition& expressionType, Symbol arith)
 {
-	definition lhsType;
+	definition lhsType; //if the optional symbol (declared in the header) is blank, we go down the tree, else assign the left side type
 	if (arith.getIdentifer() == "")
 	{
 		arith = ArithOp(lhsType);
@@ -640,27 +636,27 @@ Symbol Parser::Expression(definition& expressionType, Symbol arith)
 
 	Token tempToken = scanner->CallScanner(false);
 
-	if (tempToken.type == key_and || tempToken.type == key_or || tempToken.type == key_not)
+	if (tempToken.type == key_and || tempToken.type == key_or || tempToken.type == key_not) //if the next token is an expression
 	{
-		expr.setIdentifier(tempToken.val.stringVal);
+		expr.setIdentifier(tempToken.val.stringVal); //assign it to expr
 		expr.setType(tempToken.type);
 
-		expr.addChild(arith);
+		expr.addChild(arith); //adding child to the symbol that has gone down the tree
 		token = scanner->CallScanner(true);
 		definition rhsType;
 
-		arith.addChild(ArithOp(rhsType));
+		arith.addChild(ArithOp(rhsType)); //adding child to the right side
 
-		if (!ValidTypesExpression(expressionType, lhsType, rhsType))
+		if (!ValidTypesExpression(expressionType, lhsType, rhsType)) //type checks the symbols being looked at in the expression tree
 		{
-			std::cout << "Error, invalid types.\n";
+			std::cout << "ERROR, invalid types on line: " << scanner->getLineNum() << std::endl;
 		}
 
-		expr.printTree();
+		expr.printTree(); //check the tree
 
 		Token exprOp = scanner->CallScanner(false);
 
-		if (tempToken.type == key_and || tempToken.type == key_or || tempToken.type == key_not)
+		if (tempToken.type == key_and || tempToken.type == key_or || tempToken.type == key_not) //if the next token is an expression, we recursively call it
 		{
 			return Expression(expressionType, expr);
 		}
@@ -669,7 +665,7 @@ Symbol Parser::Expression(definition& expressionType, Symbol arith)
 			return expr;
 		}
 	}
-	else
+	else //if it is not, return it and the expression type
 	{
 		expressionType = definition(lhsType);
 		return arith;
@@ -705,7 +701,7 @@ Symbol Parser::ArithOp(definition &arithType, Symbol relation)
 
 		if (!ValidTypesExpression(arithType, lhsType, rhsType))
 		{
-			std::cout << "Error, invalid types.\n";
+			std::cout << "ERROR, invalid types on line: " << scanner->getLineNum() << std::endl;
 		}
 
 		arith.printTree();
@@ -758,7 +754,7 @@ Symbol Parser::Relation(definition &relationType, Symbol term)
 
 		if (!ValidTypesExpression(relationType, lhsType, rhsType))
 		{
-			std::cout << "Error, invalid types.\n";
+			std::cout << "ERROR, invalid types on line: " << scanner->getLineNum() << std::endl;
 		}
 
 		relation.printTree();
@@ -781,7 +777,7 @@ Symbol Parser::Relation(definition &relationType, Symbol term)
 	}
 }
 
-bool Parser::isRelation(definition type)
+bool Parser::isRelation(definition type) //bool that checks if the token is of a type relation, only did it with relation for the expression tree since the others have less options
 {
 	if (type >= sym_less && type <= sym_doubEqual)
 	{
@@ -819,7 +815,7 @@ Symbol Parser::Term(definition &termType, Symbol factor)
 
 		if (!ValidTypesExpression(termType, lhsType, rhsType))
 		{
-			std::cout << "Error, invalid types.\n";
+			std::cout << "ERROR, invalid types on line: " << scanner->getLineNum() << std::endl;
 		}
 
 		Token termOp = scanner->CallScanner(false);
@@ -844,7 +840,7 @@ Symbol Parser::Term(definition &termType, Symbol factor)
 }
 
 bool Parser::ValidTypesExpression(definition& returnDef, int lhs, int rhs)
-{
+{ //type checks the symbols being looked at in the expression tree
 	if (lhs == rhs) 
 	{
 		returnDef = definition(lhs);
@@ -875,7 +871,7 @@ bool Parser::ValidTypesExpression(definition& returnDef, int lhs, int rhs)
 }
 
 Symbol Parser::Factor(definition &factorType)
-{
+{ //checks all of the factors and returns back up the tree from the bottom
 	Token tempToken = scanner->CallScanner(false);
 
 	if (tempToken.type == sym_lparen)
@@ -892,7 +888,7 @@ Symbol Parser::Factor(definition &factorType)
 		}
 		else
 		{
-			std::cout << "Error, we were expecting a ')'.\n";
+			std::cout << "ERROR, we were expecting a right parentheses on line: " << scanner->getLineNum() << std::endl;
 		}
 	}
 	else if (tempToken.type == id)
@@ -931,7 +927,7 @@ Symbol Parser::Factor(definition &factorType)
 			}
 			else
 			{
-				//error num
+				std::cout << "ERROR, integers are the only type compatible with arrays. Line: " << scanner->getLineNum() << std::endl;
 			}
 		}
 		Symbol id = SymTab.FindSymbol(token.val.stringVal, SymTab.GetScope(tempScope.name));
@@ -993,13 +989,13 @@ Symbol Parser::Factor(definition &factorType)
 	}
 	else
 	{
-		std::cout << "Error, Factor.\n";
+		std::cout << "ERROR, a wrong type was presented in your factor. Line: " << scanner->getLineNum() << std::endl;
 	}
 	
 }
 
 definition Parser::MapVariableToLiteral(int def)
-{
+{ //mapping our variable to a literal for type checking
 	switch (def) {
 	case num_integer:
 		return literal_int;
@@ -1015,18 +1011,19 @@ definition Parser::MapVariableToLiteral(int def)
 Symbol Parser::ProcedureCall() //at this point the id is scanned in
 {
 	bool isIn = SymTab.LookupSymbol(token.val.stringVal);
-	Symbol procedureCall;
+	Symbol procedureCall; //make a symbol
 	if (isIn)
 	{
-		if (SymTab.GetScope(token.val.stringVal).name != "")
+		if (SymTab.GetScope(token.val.stringVal).name != "") //this check is for the global built in functions
 		{
+			//if the token has a function call, we get the scope and find it
 			Scope procScope = SymTab.GetScope(token.val.stringVal);
 			procedureCall = SymTab.FindSymbol(token.val.stringVal, procScope);
 			
 		}
 		else
 		{
-			procedureCall = SymTab.FindSymbol(token.val.stringVal, SymTab.GetScope("global"));
+			procedureCall = SymTab.FindSymbol(token.val.stringVal, SymTab.GetScope("global")); //then global
 		}
 
 		token = scanner->CallScanner(true); //already know it is a procedure call
@@ -1062,7 +1059,7 @@ void Parser::ArgumentList()
 	}
 	else
 	{
-		std::cout << "Error, not a comma or a ).\n";
+		std::cout << "ERROR, either a comma or a right parentheses was expected in your argument list. Line: " << scanner->getLineNum() << std::endl;
 	}
 }
 
@@ -1074,7 +1071,7 @@ Symbol Parser::Name()
 	}
 	else
 	{
-		std::cout << "Error, we were expecting an identifier for a variable declaration.\n";
+		std::cout << "ERROR, an identifier was expected in your variable declaration. Line: " << scanner->getLineNum() << std::endl;
 	}
 }
 
@@ -1122,7 +1119,7 @@ void Parser::IfStatement()
 		token = scanner->CallScanner(true);
 
 		definition expressionType;
-		Expression(expressionType);
+		Expression(expressionType); //calls the expression tree
 
 		tempToken = scanner->CallScanner(false);
 
@@ -1138,12 +1135,12 @@ void Parser::IfStatement()
 				Token tempToken = scanner->CallScanner(false);
 				while (tempToken.type != key_end && tempToken.type != key_else)
 				{
-					Statement();
+					Statement(); //checking for multiple statements in the if block
 
 					tempToken = scanner->CallScanner(false);
 				}
 
-				if (tempToken.type == key_end) //will need to account for multiple statements and to account for potential else statements
+				if (tempToken.type == key_end)
 				{
 					token = scanner->CallScanner(true);
 
@@ -1151,21 +1148,21 @@ void Parser::IfStatement()
 					if (tempToken.type == key_if)
 					{
 						token = scanner->CallScanner(true);
-
+						//scanned the entire if
 						return;
 					}
 					else
 					{
-						//error looking for if
+						std::cout << "ERROR, an if was expected at the end of it.. Line: " << scanner->getLineNum() << std::endl;
 					}
 				}
-				else if (tempToken.type == key_else)
+				else if (tempToken.type == key_else) //else block
 				{
 					token = scanner->CallScanner(true);
 
 					Token tempToken = scanner->CallScanner(false);
 					while (tempToken.type != key_end)
-					{
+					{ //scanning else statements
 						Statement(); 
 
 						tempToken = scanner->CallScanner(false);
@@ -1182,27 +1179,27 @@ void Parser::IfStatement()
 					}
 					else
 					{
-						//error looking for if
+						std::cout << "ERROR, an if was expected at the end of it. Line: " << scanner->getLineNum() << std::endl;
 					}
 				}
 				else
 				{
-					//error no sc or else
+					std::cout << "ERROR, an else was expected at the end of it. Line: " << scanner->getLineNum() << std::endl;
 				}
 			}
 			else
 			{
-				//error no then
+				std::cout << "ERROR, a then was expected at the end of it. Line: " << scanner->getLineNum() << std::endl;
 			}
 		}
 		else
 		{
-			std::cout << "Error, we were expecting a ')'.\n";
+			std::cout << "ERROR, a right parentheses was expected at the end of it. Line: " << scanner->getLineNum() << std::endl;
 		}
 	}
 	else
 	{
-		std::cout << "Error, we were expecting a '('.\n";
+		std::cout << "ERROR, a left parentheses was expected here. Line: " << scanner->getLineNum() << std::endl;
 	}
 
 }
@@ -1221,7 +1218,7 @@ void Parser::LoopStatement()
 		{
 			token = scanner->CallScanner(true);
 
-			AssignmentStatement();
+			AssignmentStatement(); //checks the assignment statement
 
 			tempToken = scanner->CallScanner(false);
 
@@ -1230,7 +1227,7 @@ void Parser::LoopStatement()
 				token = scanner->CallScanner(true);
 				
 				definition expressionType;
-				Expression(expressionType);
+				Expression(expressionType); //checks the expression
 
 				tempToken = scanner->CallScanner(false);
 
@@ -1242,7 +1239,7 @@ void Parser::LoopStatement()
 					Token tempToken = scanner->CallScanner(false);
 					while (tempToken.type != key_end)
 					{
-						Statement(); //need some form of a while to keep on reading in statements
+						Statement(); //runs thru the for loop statements
 
 						tempToken = scanner->CallScanner(false);
 					}
@@ -1263,17 +1260,17 @@ void Parser::LoopStatement()
 						}
 						else
 						{
-							//error for
+							std::cout << "ERROR, a for was expected at the end of it. Line: " << scanner->getLineNum() << std::endl;
 						}
 					}
 					else
 					{
-						//error end
+						std::cout << "ERROR, an end was expected at the end of it. Line: " << scanner->getLineNum() << std::endl;
 					}
 				}
 				else
 				{
-					//error )
+					std::cout << "ERROR, a right parentheses was expected here. Line: " << scanner->getLineNum() << std::endl;
 				}
 			}
 		}
@@ -1281,13 +1278,13 @@ void Parser::LoopStatement()
 }
 
 void Parser::ReturnStatement()
-{
+{ //just calls an expression
 	definition expressionType;
 	Expression(expressionType);
 }
 
 void Parser::BuiltInFunctionDeclarations()
-{
+{ //declaring the built in functions, need in the symbol table to compile the correct programs
 	Symbol getBool;
 	getBool.setIdentifier("getbool");
 	getBool.setIsGlobal(true);

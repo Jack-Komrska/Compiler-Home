@@ -5,6 +5,7 @@
 #include "SymbolTable.h"
 #include <fstream>
 #include <string>
+#include <fstream>
 
 class Parser
 {
@@ -12,9 +13,10 @@ class Parser
 	Scanner *scanner;
 	Token token;
 	Scope tempScope; //the current scope of the parsing
-	//bool isChild = false;
+	std::ifstream file;
+
 public:
-	Parser();
+	Parser(std::string fName);
 
 	void Program();
 
@@ -50,11 +52,11 @@ public:
 
 	void ReturnStatement();
 
-	void Identifier();
+	//void Identifier();
 
 	bool TypeMark(definition);
 
-	void Bound();
+	//void Bound();
 
 	Symbol Expression(definition &expressionType, Symbol arith = Symbol());
 
